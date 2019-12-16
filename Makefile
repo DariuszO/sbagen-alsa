@@ -1,7 +1,7 @@
 # build sbagen
 all:
 	sh build-libs.sh
-	gcc -std=c++98 -o sbagen sbagen.c -DT_LINUX_ALSA -Wall -g -O3 -s -lm -lpthread  `pkg-config --cflags alsa` -DOGG_DECODE `pkg-config --libs alsa` `pkg-config --libs vorbisfile`
+	gcc -std=cc89 -o sbagen sbagen.c -DT_LINUX_ALSA -Wall -g -O3 -s -lm -lpthread  `pkg-config --cflags alsa` -DOGG_DECODE `pkg-config --libs alsa` `pkg-config --libs vorbisfile`
 
 # clean house
 clean:
