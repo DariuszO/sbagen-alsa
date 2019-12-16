@@ -22,7 +22,7 @@ echo ""
 cp -v .libs/libmad.a ../libs/linux-libmad.a || {
     echo libmad.a missing; exit 1; }
 
-cp -v mad.h ../libs/ || {
+cp -v ../oldlib/mad.h ../libs/ || {
     echo Header file missing; exit 1; }
 
 make clean >/dev/null 2>&1
@@ -39,8 +39,20 @@ echo ""
 cp -v .libs/libvorbisidec.a ../libs/linux-libvorbisidec.a || {
     echo libvorbisidec.a missing; exit 1; }
 
-cp -v ivorbiscodec.h ivorbisfile.h ogg.h os_types.h config_types.h ../libs/ || {
-    echo Not all expected header files present; exit 1; }
+cp -v ../oldlib/ivorbiscodec.h ../libs/ || {
+    echo Header file missing; exit 1; }
+	
+cp -v ../oldlib/ivorbisfile.h ../libs/ || {
+    echo Header file missing; exit 1; }
+	
+cp -v ../oldlib/ogg.h ../libs/ || {
+    echo Header file missing; exit 1; }
+	
+cp -v ../oldlib/os_types.h ../libs/ || {
+    echo Header file missing; exit 1; }
+	
+cp -v ../oldlib/config_types.h ../libs/ || {
+    echo Header file missing; exit 1; }
 
 make clean >/dev/null 2>&1
 
