@@ -1,5 +1,5 @@
 [submodule "tremor"]
-	path = Tremor
+	path = tremor
 	url = https://github.com/DariuszO/tremor
 [submodule "libmad"]
 	path = libmad
