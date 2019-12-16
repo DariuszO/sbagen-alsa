@@ -1,0 +1,6 @@
+[submodule "tremor"]
+	path = Tremor
+	url = https://github.com/DariuszO/tremor
+[submodule "libmad"]
+	path = libmad
+	url = git@github.com:DariuszO/libmad.git
