@@ -28,7 +28,7 @@
 //	FINK project's patches to ESounD, by Shawn Hsiao and Masanori
 //	Sekino.  See: http://fink.sf.net
 
-#define VERSION "1.4.4"
+#define VERSION "1.4.4.1"
 
 // This should be built with one of the following target macros
 // defined, which selects options for that platform, or else with some
