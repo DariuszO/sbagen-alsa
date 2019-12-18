@@ -667,7 +667,7 @@ inbuf_loop(void *vp) {
 int 
 inbuf_read(int *dst, int dlen) {
    int rv= 0;
-   int waited= 0;	// As a precaution, bail out if other thread hangs for some reason
+   int waited= 0;	/** As a precaution, bail out if other thread hangs for some reason*/
    int a;
 
    while (dlen > 0) {
@@ -702,9 +702,9 @@ inbuf_read(int *dst, int dlen) {
    return rv;
 }
 
-//
+/**/
 //	Start off the thread that fills the buffer
-//
+/**/
 
 void 
 inbuf_start(int(*rout)(int*,int), int len) {
@@ -719,11 +719,11 @@ inbuf_start(int(*rout)(int*,int), int len) {
    ib_eof= 0;
    if (!opt_Q) warn("Initialising %d-sample buffer for mix stream", ib_len/2);
 
-   // Preload 75% of the buffer -- or at least attempt to do so;
-   // errors/eof/etc will be picked up in the inbuf_loop() routine
+   /** Preload 75% of the buffer -- or at least attempt to do so;
+   // errors/eof/etc will be picked up in the inbuf_loop() routine */
    ib_wr= ib_read(inbuf, ib_len*3/4);
 
-   // Start the thread off
+   /** Start the thread off */
 #ifdef UNIX_MISC
    {
       pthread_t thread;
@@ -741,28 +741,22 @@ inbuf_start(int(*rout)(int*,int), int len) {
 }
 
 
-//
-//	Time-keeping functions
-//
+/**	Time-keeping functions */
+#define H24 (86400000)			/** 24 hours */
+#define H12 (43200000)			/** */
 
-#define H24 (86400000)			// 24 hours
-#define H12 (43200000)			// 12 hours
-
-inline int t_per24(int t0, int t1) {		// Length of period starting at t0, ending at t1.
-  int td= t1 - t0;				// NB for t0==t1 this gives 24 hours, *NOT 0*
+inline int t_per24(int t0, int t1) {		/** Length of period starting at t0, ending at t1. */
+  int td= t1 - t0;				/** NB for t0==t1 this gives 24 hours, *NOT 0 */
   return td > 0 ? td : td + H24;
 }
-inline int t_per0(int t0, int t1) {		// Length of period starting at t0, ending at t1.
-  int td= t1 - t0;				// NB for t0==t1 this gives 0 hours
+inline int t_per0(int t0, int t1) {		/** Length of period starting at t0, ending at t1.*/
+  int td= t1 - t0;				/** NB for t0==t1 this gives 0 hours */
   return td >= 0 ? td : td + H24;
 }
-inline int t_mid(int t0, int t1) {		// Midpoint of period from t0 to t1
+inline int t_mid(int t0, int t1) {		/** Midpoint of period from t0 to t1 */
   return ((t1 < t0) ? (H24 + t0 + t1) / 2 : (t0 + t1) / 2) % H24;
 }
 
-//
-//	M A I N
-//
 
 int 
 main(int argc, char **argv) {
@@ -784,14 +778,14 @@ main(int argc, char **argv) {
    if (argc < 1) usage();
    
    if (rv == 'i') {
-      // Immediate mode
+      /** Immediate mode */
       readSeqImm(argc, argv);
    } else if (rv == 'p') {
-      // Pre-programmed sequence
+      /** Pre-programmed sequence */
       readPreProg(argc, argv);
    } else {
-      // Sequenced mode -- sequence may include options, so options
-      // are not settled until below this point
+      /** Sequenced mode -- sequence may include options, so options */
+      /** are not settled until below this point */
       if (argc < 1) usage();
       readSeq(argc, argv);
    }
@@ -904,7 +898,7 @@ scanOptions(int *acp, char ***avp) {
 	     if (!opt_m) opt_m= *argv++;
 	     break;
 	  case 'S': opt_S= 1;
-	     if (!fast_mult) fast_mult= 1; 		// Don't try to sync with real time
+	     if (!fast_mult) fast_mult= 1; 		/** Don't try to sync with real time **/
 	     break;
 	  case 'L':
 	     if (argc-- < 1 || 0 == (val= readTime(*argv, &opt_L)) || 
@@ -1312,18 +1306,12 @@ StrDup(char *str) {
 }
 
 #ifdef UNIX_TIME
-// Precalculate a reference timestamp to accelerate calcNow().  This
-// can be any recent time.  We recalculate it every 10 minutes.  The
-// only reason for doing this is to cope with clocks going forwards or
-// backwards when entering or leaving summer time so that people wake
-// up on time on these two dates; an hour of the sequence will be
-// repeated or skipped.  The 'time_ref*' variables will be initialised
-// on the first call to calcNow().
 
-static int time_ref_epoch= 0;	// Reference time compared to UNIX epoch
-static int time_ref_ms;		// Reference time in sbagen 24-hour milliseconds
 
-void 
+static int time_ref_epoch= 0;
+static int time_ref_ms;
+
+void
 setupRefTime() {
   struct tm *tt;
   time_t tim= time(0);
@@ -1555,7 +1543,7 @@ outChunk() {
       mix1= tmp_buf[off];
       mix2= tmp_buf[off+1];
 
-      // Do default mixing at 100% if no mix/* stuff is present
+      // Do default mixing at 100% if no mix/* stuff is present */
       if (!mix_flag) {
 	 tot1= mix1 << 12;
 	 tot2= mix2 << 12;
@@ -1567,7 +1555,7 @@ outChunk() {
       for (a= 0; a<N_CH; a++, ch++) switch (ch->typ) {
        case 0:
 	  break;
-       case 1:	// Binaural tones
+       case 1:	// Binaural tones */
 	  ch->off1 += ch->inc1;
 	  ch->off1 &= (ST_SIZ << 16) - 1;
 	  tot1 += ch->amp * sin_table[ch->off1 >> 16];
@@ -1575,12 +1563,12 @@ outChunk() {
 	  ch->off2 &= (ST_SIZ << 16) - 1;
 	  tot2 += ch->amp2 * sin_table[ch->off2 >> 16];
 	  break;
-       case 2:	// Pink noise
+       case 2:	// Pink noise */
 	  val= ns * ch->amp;
 	  tot1 += val;
 	  tot2 += val;
 	  break;
-       case 3:	// Bell
+       case 3:	// Bell*/
 	  if (ch->off2) {
 	     ch->off1 += ch->inc1;
 	     ch->off1 &= (ST_SIZ << 16) - 1;
@@ -1588,22 +1576,22 @@ outChunk() {
 	     tot1 += val; tot2 += val;
 	     if (--ch->inc2 < 0) {
 		ch->inc2= out_rate/20;
-		ch->off2 -= 1 + ch->off2 / 12;	// Knock off 10% each 50 ms
+		ch->off2 -= 1 + ch->off2 / 12;	// Knock off 10% each 50 ms*/
 	     }
 	  }
 	  break;
-       case 4:	// Spinning pink noise
+       case 4:	// Spinning pink noise*/
 	  ch->off1 += ch->inc1;
 	  ch->off1 &= (ST_SIZ << 16) - 1;
 	  val= (ch->inc2 * sin_table[ch->off1 >> 16]) >> 24;
 	  tot1 += ch->amp * noise_buf[(uchar)(noise_off+128+val)];
 	  tot2 += ch->amp * noise_buf[(uchar)(noise_off+128-val)];
 	  break;
-       case 5:	// Mix level
+       case 5:	// Mix level*/
 	  tot1 += mix1 * ch->amp;
 	  tot2 += mix2 * ch->amp;
 	  break;
-       default:	// Waveform-based binaural tones
+       default:	// Waveform-based binaural tones*/
 	  tab= waves[-1 - ch->typ];
 	  ch->off1 += ch->inc1;
 	  ch->off1 &= (ST_SIZ << 16) - 1;
@@ -1615,16 +1603,16 @@ outChunk() {
       }
 
 
-      // // Add pink noise as dithering
-      // tot1 += (ns >> NS_DITHER) + 0x8000;
-      // tot2 += (ns >> NS_DITHER) + 0x8000;
+      // // Add pink noise as dithering*/
+      // tot1 += (ns >> NS_DITHER) + 0x8000;*/
+      // tot2 += (ns >> NS_DITHER) + 0x8000;*/
       
-      // // Add white noise as dithering
-      // tot1 += (seed >> 1) + 0x8000;
-      // tot2 += (seed >> 1) + 0x8000;
+      // // Add white noise as dithering*/
+      // tot1 += (seed >> 1) + 0x8000;*/
+      // tot2 += (seed >> 1) + 0x8000;*/
 
-      // White noise dither; you could also try (rand0-rand1) for a
-      // dither with more high frequencies
+      // White noise dither; you could also try (rand0-rand1) for a*/
+      // dither with more high frequencies*/
       rand0= rand1; 
       rand1= (rand0 * 0x660D + 0xF35F) & 0xFFFF;
       if (tot1 <= 0x7FFF0000) tot1 += rand0;
@@ -1634,7 +1622,7 @@ outChunk() {
       out_buf[off++]= tot2 >> 16;
   }
 
-  // Generate debugging amplitude output
+  // Generate debugging amplitude ou*/tput*/
   if (DEBUG_DUMP_AMP) {
     short *sp= out_buf;
     short *end= out_buf + out_blen;
@@ -1649,7 +1637,7 @@ outChunk() {
     printf("\n"); fflush(stdout);
   }
 
-  // Rewrite buffer for 8-bit mode
+  // Rewrite buffer for 8-bit mode*/
   if (out_mode == 0) {
     short *sp= out_buf;
     short *end= out_buf + out_blen;
@@ -1657,14 +1645,14 @@ outChunk() {
     while (sp < end) *cp++= (*sp++ >> 8) + 128;
   }
 
-  // Rewrite buffer for 16-bit byte-swapping
+  // Rewrite buffer for 16-bit byte-swapping*/
   if (out_mode == 2) {
     char *cp= (char*)out_buf;
     char *end= (char*)(out_buf + out_blen);
     while (cp < end) { char tmp= *cp++; cp[-1]= cp[0]; *cp++= tmp; }
   }
 
-  // Check and update the byte count if necessary
+  // Check and update the byte count if necessary*/
   if (byte_count > 0) {
     if (byte_count <= out_bsiz) {
       writeOut((char*)out_buf, byte_count);
@@ -1685,17 +1673,17 @@ writeOut(char *buf, int siz) {
 
 #ifdef WIN_AUDIO
   if (out_fd == -9999) {
-     // Win32 output: write it to a header and send it off
+     // Win32 output: write it to a header and send it off*/
      MMRESULT rv;
 
-     //debug_win32_buffer_status();
+     //debug_win32_buffer_status();*/
 
-     //while (aud_cnt == BUFFER_COUNT) {
-     //while (aud_head[aud_current]->dwFlags & WHDR_INQUEUE) {
+     //while (aud_cnt == BUFFER_COUNT) {*/
+     //while (aud_head[aud_current]->dwFlags & WHDR_INQUEUE) {*/
      while (!(aud_head[aud_current]->dwFlags & WHDR_DONE)) {
-	//debug("SLEEP %d", out_buf_ms / 2 + 1);
+	//debug("SLEEP %d", out_buf_ms / 2 + 1);*/
 	Sleep(out_buf_ms / 2 + 1);
-	//debug_win32_buffer_status();
+	//debug_win32_buffer_status();*/
      }
 
      memcpy(aud_head[aud_current]->lpData, buf, siz);
@@ -1722,7 +1710,7 @@ writeOut(char *buf, int siz) {
   if (out_fd == -9999) {
     int new_wr= (aud_wr + 1) % BUFFER_COUNT;
 
-    // Wait until there is space
+    // Wait until there is space*/
     while (new_wr == aud_rd) delay(20);
 
     memcpy(aud_buf[aud_wr], buf, siz);
@@ -1734,7 +1722,7 @@ writeOut(char *buf, int siz) {
 
   
 #ifdef ALSA_AUDIO
-  long frames_written, frames_to_write=siz/4;//i think 4  because stereo, 2 bytes per sample
+  long frames_written, frames_to_write=siz/4; //i think 4  because stereo, 2 bytes per sample*/
   
   if (out_fd == -9999) {
     //printf("siz:%d\n",siz);
@@ -1760,9 +1748,9 @@ writeOut(char *buf, int siz) {
   error("Output error");
 }
 
-//
+//**
 //	Calculate amplitude adjustment factor for frequency 'freq'
-//
+///**/
 
 double 
 ampAdjust(double freq) {
@@ -1783,11 +1771,11 @@ ampAdjust(double freq) {
    return p0->adj + (p1->adj - p0->adj) * (freq - p0->freq) / (p1->freq - p0->freq);
 }
    
-
+/***/
 //
 //	Correct channel values and types according to current period,
 //	and current time
-//
+//*/
 
 void 
 corrVal(int running) {
@@ -1799,7 +1787,7 @@ corrVal(int running) {
    double rat0, rat1;
    int trigger= 0;
    
-   // Move to the correct period
+   // Move to the correct period*/
    while ((now >= t0) ^ (now >= t1) ^ (t1 > t0)) {
       per= per->nxt;
       t0= per->tim;
@@ -1815,10 +1803,10 @@ corrVal(int running) {
 	 }
 	 dispCurrPer(stderr); status(0);
       }
-      trigger= 1;		// Trigger bells or whatever
+      trigger= 1;		// Trigger bells or whatever*/
    }
    
-   // Run through to calculate voice settings for current time
+   // Run through to calculate voice settings for current time*/
    rat1= t_per0(t0, now) / (double)t_per24(t0, t1);
    rat0= 1 - rat1;
    for (a= 0; a<N_CH; a++) {
@@ -1844,7 +1832,7 @@ corrVal(int running) {
 	 }
       }
       
-      // Setup vv->*
+      // Setup vv->**/
       switch (vv->typ) {
        case 1:
 	  vv->amp= rat0 * v0->amp + rat1 * v1->amp;
@@ -1855,7 +1843,7 @@ corrVal(int running) {
 	  vv->amp= rat0 * v0->amp + rat1 * v1->amp;
 	  break;
        case 3:
-	  vv->amp= v0->amp;		// No need to slide, as bell only rings briefly
+	  vv->amp= v0->amp;		// No need to slide, as bell only rings briefly*/
 	  vv->carr= v0->carr;
 	  break;
        case 4:
@@ -1868,7 +1856,7 @@ corrVal(int running) {
        case 5:
 	  vv->amp= rat0 * v0->amp + rat1 * v1->amp;
 	  break;
-       default:		// Waveform based binaural
+       default:		// Waveform based binaural*/
 	  vv->amp= rat0 * v0->amp + rat1 * v1->amp;
 	  vv->carr= rat0 * v0->carr + rat1 * v1->carr;
 	  vv->res= rat0 * v0->res + rat1 * v1->res;
@@ -1876,7 +1864,7 @@ corrVal(int running) {
       }
    }
    
-   // Check and limit amplitudes if -c option in use
+   // Check and limit amplitudes if -c option in use*/
    if (opt_c) {
       double tot_beat= 0, tot_other= 0;
       for (a= 0; a<N_CH; a++) {
@@ -1903,12 +1891,12 @@ corrVal(int running) {
       }
    }
    
-   // Setup Channel data from Voice data
+   // Setup Channel data from Voice data*/
    for (a= 0; a<N_CH; a++) {
       ch= &chan[a];
       vv= &ch->v;
       
-      // Setup ch->* from vv->*
+      // Setup ch->* from vv->**/
       switch (vv->typ) {
 	 double freq1, freq2;
        case 1:
@@ -1956,12 +1944,12 @@ corrVal(int running) {
       
 //
 //	Setup audio device
-//
+//*/
 
 void 
 setup_device(void) {
 
-  // Handle output to files and pipes
+  // Handle output to files and pipes*/
   if (opt_O || opt_o) {
     if (opt_O)
       out_fd= 1;		// stdout
@@ -1988,7 +1976,7 @@ setup_device(void) {
   }
 
 #ifdef OSS_AUDIO
-  // Normal /dev/dsp output
+  // Normal /dev/dsp output*/
   {
     int stereo, rate, fragsize, numfrags, enc;
     int targ_ms= 400;	// How much buffering we want, ideally
@@ -2055,7 +2043,7 @@ setup_device(void) {
   }
 #endif
 #ifdef WIN_AUDIO
-  // Output using Win32 calls
+  // Output using Win32 calls*/
   {
      MMRESULT rv;
      WAVEFORMATEX fmt;
@@ -2074,7 +2062,7 @@ setup_device(void) {
      //    waveOutOpen(&aud_handle, WAVE_MAPPER, &fmt, 0, 
      //                0L, WAVE_FORMAT_QUERY))
      //    error("Windows is rejecting our audio request (%d-bit stereo, %dHz)",
-     //          out_mode ? 16 : 8, out_rate);
+     //          out_mode ? 16 : 8, out_rate);*/
 
      if (MMSYSERR_NOERROR != 
 	 (rv= waveOutOpen(&aud_handle, WAVE_MAPPER, 
@@ -2134,7 +2122,7 @@ setup_device(void) {
   }
 #endif
 #ifdef MAC_AUDIO
-  // Mac CoreAudio for OS X
+  // Mac CoreAudio for OS X*/
   {
     char deviceName[256];
     OSStatus err;
@@ -2153,11 +2141,11 @@ setup_device(void) {
 
     // N.B.  Both -r and -b flags are totally ignored for CoreAudio --
     // we just use whatever the default device is set to, and feed it
-    // floats.
+    // floats.*/
     out_mode= 1;
     out_fd= -9999;
 
-    // Find default device
+    // Find default device*/
     propertySize= sizeof(aud_dev);
     if ((err= AudioHardwareGetProperty(kAudioHardwarePropertyDefaultOutputDevice,
 				       &propertySize, &aud_dev)))
@@ -2166,14 +2154,14 @@ setup_device(void) {
     if (aud_dev == kAudioDeviceUnknown)
       error("No default audio device found");
     
-    // Get device name
+    // Get device name*/
     propertySize= sizeof(deviceName);
     if ((err= AudioDeviceGetProperty(aud_dev, 1, 0,
 				     kAudioDevicePropertyDeviceName,
 				     &propertySize, deviceName)))
       error("Get audio device name failed, status = %d", (int)err);
     
-    // Get device properties
+    // Get device properties*/
     propertySize= sizeof(streamDesc);
     if ((err= AudioDeviceGetProperty(aud_dev, 1, 0,
 				     kAudioDevicePropertyStreamFormat,
@@ -2192,7 +2180,7 @@ setup_device(void) {
       error("Expecting a 32-bit float linear PCM output stream -- \n"
 	    "default output uses another format");
 
-    // Set buffer size
+    // Set buffer size*/
     bufferByteCount= BUFFER_SIZE / 2 * sizeof(float);
     propertySize= sizeof(bufferByteCount);
     if ((err= AudioDeviceSetProperty(aud_dev, 0, 0, 0,
@@ -2216,7 +2204,7 @@ setup_device(void) {
   }
 #endif
 #ifdef ALSA_AUDIO
-  //boilerplate alsa device init code
+  /**boilerplate alsa device init code*/
   int err;
   if ((err = snd_pcm_open (&playback_handle, opt_d, SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
     fprintf (stderr, "cannot open audio device %s (%s)\n", 

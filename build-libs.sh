@@ -14,6 +14,10 @@ cd libmad || { echo "Can't move to libmad directory"; exit 1; }
 
 echo ""
 
+make clean || exit 1
+
+echo ""
+
 ./configure || exit 1
 make -j$(nproc) || exit 1
 
@@ -30,6 +34,10 @@ make clean >/dev/null 2>&1
 echo LIBMAD DONE
 
 cd .. && cd tremor || { echo "tremor directory not found!!"; exit 1; }
+
+make clean || exit 1
+
+echo ""
 
 ./autogen.sh || exit 1
 make -j$(nproc) || exit 1
