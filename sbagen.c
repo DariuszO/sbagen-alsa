@@ -545,39 +545,39 @@ char *opt_d= "/dev/dsp";	// Output device
 FILE *mix_in;			// Input stream for mix sound data, or 0
 int mix_cnt;			// Version number from mix filename (#<digits>), or -1
 int bigendian;			// Is this platform Big-endian?
-int mix_flag= 0;		// Has 'mix/*' been used in the sequence?
+int mix_flag= 0;		// Has 'mix/*' been used in the sequence? */
 
-int opt_c;			// Number of -c option points provided (max 16)
+int opt_c;			// Number of -c option points provided (max 16) */
 struct AmpAdj { 
    double freq, adj;
-} ampadj[16];			// List of maximum 16 (freq,adj) pairs, freq-increasing order
+} ampadj[16];			// List of maximum 16 (freq,adj) pairs, freq-increasing order */
 
-char *pdir;			// Program directory (used as second place to look for -m files)
+char *pdir;			// Program directory (used as second place to look for -m files) */
 
 #ifdef WIN_AUDIO
  #define BUFFER_COUNT 8
  #define BUFFER_SIZE 8192*4
  HWAVEOUT aud_handle;
  WAVEHDR *aud_head[BUFFER_COUNT];
- int aud_current;		// Current header
- int aud_cnt;			// Number of headers in use
+ int aud_current;		// Current header */
+ int aud_cnt;			// Number of headers in use */
 #endif
 
 #ifdef MAC_AUDIO
  #define BUFFER_COUNT 8
  #define BUFFER_SIZE 4096*4
  char aud_buf[BUFFER_COUNT][BUFFER_SIZE];
- int aud_rd;	// Next buffer to read out of list (to send to device)
- int aud_wr;	// Next buffer to write.  aud_rd==aud_wr means empty buffer list
+ int aud_rd;	// Next buffer to read out of list (to send to device)*/
+ int aud_wr;	// Next buffer to write.  aud_rd==aud_wr means empty buffer list */
  static AudioDeviceID aud_dev;
 #endif
 
 #ifdef ALSA_AUDIO
 snd_pcm_t *playback_handle;
 #endif
-//
+/**
 //	Delay for a short period of time (in ms)
-//
+*/
 
 #ifdef UNIX_MISC
 void 
@@ -596,22 +596,22 @@ delay(int ms) {
 #endif
 
 
-//
+/**
 //	WAV/OGG/MP3 input data buffering
-//
+//*/
 
-int *inbuf;		// Buffer for input data (as 20-bit samples)
-int ib_len;		// Length of input buffer (in ints)
-volatile int ib_rd;	// Read-offset in inbuf
-volatile int ib_wr;	// Write-offset in inbuf
-volatile int ib_eof;	// End of file flag
-int ib_cycle= 100;	// Time in ms for a complete loop through the buffer
-int (*ib_read)(int*,int);  // Routine to refill buffer
+int *inbuf;		// Buffer for input data (as 20-bit samples) */
+int ib_len;		// Length of input buffer (in ints) */
+volatile int ib_rd;	// Read-offset in inbuf */
+volatile int ib_wr;	// Write-offset in inbuf */
+volatile int ib_eof;	// End of file flag*/
+int ib_cycle= 100;	// Time in ms for a complete loop through the buffer*/
+int (*ib_read)(int*,int);  // Routine to refill buffer */
 
 int 
 inbuf_loop(void *vp) {
    int now= -1;
-   int waited= 0;	// Used to bail out if the main thread dies for some reason
+   int waited= 0;	/** Used to bail out if the main thread dies for some reason */
    int a;
 
    while (1) {
@@ -622,10 +622,10 @@ inbuf_loop(void *vp) {
       if (cnt > ib_len-wr) cnt= ib_len-wr;
       if (cnt > ib_len/8) cnt= ib_len/8;
 
-      // Choose to only work in ib_len/8 units, although this is not
-      // 100% necessary
+      /** Choose to only work in ib_len/8 units, although this is not
+      // 100% necessary */
       if (cnt < ib_len/8) {
-	 // Wait a little while for the buffer to empty (minimum 1ms)
+	 // Wait a little while for the buffer to empty (minimum 1ms) */
 	 if (waited > 10000 + ib_cycle)
 	    error("Mix stream halted for more than 10 seconds; aborting");
 	 delay(a= 1+ib_cycle/4);
@@ -655,14 +655,14 @@ inbuf_loop(void *vp) {
    return 0;
 }
 
-//
+/**
 //	Read a chunk of int data from the input buffer.  This will
 //	always return enough data unless we have hit the end of the
 //	file, in which case it returns a lower number or 0.  If not
 //	enough data has been read by the input thread, then this
 //	thread pauses until data is ready -- but this should hopefully
 //	never happen.
-//
+*/
 
 int 
 inbuf_read(int *dst, int dlen) {
@@ -1275,6 +1275,7 @@ error(char *fmt, ...) {
   getchar();
 #endif
   exit(1);
+  va_end(ap);
 }
 
 void 
@@ -1282,6 +1283,7 @@ debug(char *fmt, ...) {
   va_list ap; va_start(ap, fmt);
   vfprintf(stderr, fmt, ap);
   fprintf(stderr, "\n");
+  va_end(ap);
 }
 
 void 
@@ -1289,6 +1291,7 @@ warn(char *fmt, ...) {
   va_list ap; va_start(ap, fmt);
   vfprintf(stderr, fmt, ap);
   fprintf(stderr, "\n");
+  va_end(ap);
 }
 
 void *
@@ -1362,9 +1365,9 @@ int userTime() { return 0; }
 
 static int seed= 2;
 
-//inline int qrand() {
-//  return (seed= seed * 75 % 131074) - 65535;
-//}
+inline int qrand() {
+  return (seed= seed * 75 % 131074) - 65535;
+}
 
 //
 //	Generate next sample for simulated pink noise, with same
@@ -1408,29 +1411,30 @@ noise2() {
   return noise_buf[noise_off++]= (tot >> NS_ADJ);
 }
 
-//	//
-//	//	Generate next sample for simulated pink noise, scaled the same
-//	//	as the sin_table[].  This version uses a library random number
-//	//	generator, and no smoothing.
-//	//
-//	
-//	inline double 
-//	noise() {
-//	  int tot= 0;
-//	  int bit= ~0;
-//	  int a;
-//	  int off;
-//	
-//	  ns_tbl[ns_off]= (rand() - (RAND_MAX / 2)) / (NS_BIT + 1);
-//	  off= ns_off;
-//	  for (a= 0; a<=NS_BIT; a++, bit <<= 1) {
-//	    off &= bit;
-//	    tot += ns_tbl[off];
-//	  }
-//	  ns_off= (ns_off + 1) & ((1<<NS_BIT) - 1);
-//	
-//	  return tot * (ST_AMP / (RAND_MAX * 0.5));
-//	}
+	//
+	//	Generate next sample for simulated pink noise, scaled the same
+	//	as the sin_table[].  This version uses a library random number
+	//	generator, and no smoothing.
+	//
+	
+	inline double 
+	noise() {
+	  int tot= 0;
+	  int bit= ~0;
+	  int a;
+	  int off;
+	
+	  ns_tbl[ns_off]= (rand() - (RAND_MAX / 2)) / (NS_BIT + 1);
+	  off= ns_off;
+	  for (a= 0; a<=NS_BIT; a++, bit <<= 1) {
+	    off &= bit;
+	    tot += ns_tbl[off];
+	  }
+	  ns_off= (ns_off + 1) & ((1<<NS_BIT) - 1);
+	
+	  return tot * (ST_AMP / (RAND_MAX * 0.5));
+	}
+
 
 //
 //	Play loop
@@ -1748,9 +1752,9 @@ writeOut(char *buf, int siz) {
   error("Output error");
 }
 
-//**
+/**
 //	Calculate amplitude adjustment factor for frequency 'freq'
-///**/
+*/
 
 double 
 ampAdjust(double freq) {
@@ -1771,7 +1775,7 @@ ampAdjust(double freq) {
    return p0->adj + (p1->adj - p0->adj) * (freq - p0->freq) / (p1->freq - p0->freq);
 }
    
-/***/
+/**
 //
 //	Correct channel values and types according to current period,
 //	and current time
@@ -1942,11 +1946,11 @@ corrVal(int running) {
    }
 }       
       
-//
+/**
 //	Setup audio device
-//*/
+*/
 
-void 
+void
 setup_device(void) {
 
   // Handle output to files and pipes*/
@@ -2014,7 +2018,7 @@ setup_device(void) {
        
        if (-1 == ioctl(out_fd, SNDCTL_DSP_GETOSPACE, &info))
 	  error("Can't get audio buffer info, errno %d", errno);
-
+v
        if (!retry && info.fragsize != (1<<fragsize)) {
 	  // We've received a different fragment size to what we asked
 	  // for.  This means that the numfrags calculation is wrong.
@@ -2435,6 +2439,7 @@ formatNameDef(char *fmt, ...) {
    va_start(ap, fmt);
    vsnprintf(buf, sizeof(buf), fmt, ap);
    readNameDef2();
+   va_end(ap);
 }
 void 
 formatTimeLine(int tim, char *fmt, ...) {
@@ -2443,6 +2448,7 @@ formatTimeLine(int tim, char *fmt, ...) {
    va_start(ap, fmt);
    vsnprintf(p, buf + sizeof(buf) - p, fmt, ap);
    readTimeLine2();
+   va_end(ap);
 }
 
 //
@@ -3419,3 +3425,4 @@ create_slide(int ac, char **av) {
 
 
 // END //
+
