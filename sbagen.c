@@ -1301,6 +1301,7 @@ error(char *fmt, ...) {
   getchar();
 #endif
   exit(1);
+  va_end(ap);
 }
 
 void
@@ -1308,6 +1309,7 @@ debug(char *fmt, ...) {
   va_list ap; va_start(ap, fmt);
   vfprintf(stderr, fmt, ap);
   fprintf(stderr, "\n");
+  va_end(ap);
 }
 
 void
@@ -1315,6 +1317,7 @@ warn(char *fmt, ...) {
   va_list ap; va_start(ap, fmt);
   vfprintf(stderr, fmt, ap);
   fprintf(stderr, "\n");
+  va_end(ap);
 }
 
 void *
@@ -2461,6 +2464,7 @@ formatNameDef(char *fmt, ...) {
    va_start(ap, fmt);
    vsnprintf(buf, sizeof(buf), fmt, ap);
    readNameDef2();
+   va_end(ap);
 }
 void
 formatTimeLine(int tim, char *fmt, ...) {
@@ -2469,6 +2473,7 @@ formatTimeLine(int tim, char *fmt, ...) {
    va_start(ap, fmt);
    vsnprintf(p, buf + sizeof(buf) - p, fmt, ap);
    readTimeLine2();
+   va_end(ap);
 }
 
 //
