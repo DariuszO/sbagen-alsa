@@ -9,15 +9,15 @@
 //	" This program is free software; you can redistribute it and/or modify
 //	  it under the terms of the GNU General Public License as published by
 //	  the Free Software Foundation, version 2.
-//	  
+//
 //	  This program is distributed in the hope that it will be useful,
 //	  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //	  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //	  GNU General Public License for more details. "
 //
 //	See the file COPYING for details of this license.
-//	
-//	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+//
+//	- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //
 //	Some code fragments in the Win32 audio handling are based on
 //	code from PLIB (c) 2001 by Steve Baker, originally released
@@ -28,7 +28,7 @@
 //	FINK project's patches to ESounD, by Shawn Hsiao and Masanori
 //	Sekino.  See: http://fink.sf.net
 
-#define VERSION "1.4.4.1"
+#define VERSION "1.4.4.2"
 
 // This should be built with one of the following target macros
 // defined, which selects options for that platform, or else with some
@@ -59,43 +59,79 @@
 
 #ifdef T_LINUX
 #define OSS_AUDIO
-#define UNIX_TIME
-#define UNIX_MISC
+#if define UNIX_TIME
+#else
+  #error UNIX_TIME or WIN_TIME not defined.  Maybe you did not define one of T_LINUX/T_MINGW/T_MACOSX/etc ?
+#endif
+#if define UNIX_MISC
+#else
+  #error UNIX_MISC or WIN_MISC not defined.  Maybe you did not define one of T_LINUX/T_MINGW/T_MACOSX/etc ?
+#endif
 #define ANSI_TTY
 #endif
 
 #ifdef T_LINUX_ALSA
 #define ALSA_AUDIO
-#define UNIX_TIME
-#define UNIX_MISC
+#if define UNIX_TIME
+#else
+  #error UNIX_TIME or WIN_TIME not defined.  Maybe you did not define one of T_LINUX/T_MINGW/T_MACOSX/etc ?
+#endif
+#if define UNIX_MISC
+#else
+  #error UNIX_MISC or WIN_MISC not defined.  Maybe you did not define one of T_LINUX/T_MINGW/T_MACOSX/etc ?
+#endif
 #define ANSI_TTY
 #endif
 
 #ifdef T_MINGW
 #define WIN_AUDIO
-#define WIN_TIME
-#define WIN_MISC
+#if define WIN_TIME
+#else
+  #error UNIX_TIME or WIN_TIME not defined.  Maybe you did not define one of T_LINUX/T_MINGW/T_MACOSX/etc ?
+#endif
+#if define WIN_MISC
+#else
+  #error UNIX_MISC or WIN_MISC not defined.  Maybe you did not define one of T_LINUX/T_MINGW/T_MACOSX/etc ?
+#endif
 #define EXIT_KEY
 #endif
 
 #ifdef T_MSVC
 #define WIN_AUDIO
-#define WIN_TIME
-#define WIN_MISC
+#if define WIN_TIME
+#else
+  #error UNIX_TIME or WIN_TIME not defined.  Maybe you did not define one of T_LINUX/T_MINGW/T_MACOSX/etc ?
+#endif
+#if define WIN_MISC
+#else
+  #error UNIX_MISC or WIN_MISC not defined.  Maybe you did not define one of T_LINUX/T_MINGW/T_MACOSX/etc ?
+#endif
 #define EXIT_KEY
 #endif
 
 #ifdef T_MACOSX
 #define MAC_AUDIO
-#define UNIX_TIME
-#define UNIX_MISC
+#if define UNIX_TIME
+#else
+  #error UNIX_TIME or WIN_TIME not defined.  Maybe you did not define one of T_LINUX/T_MINGW/T_MACOSX/etc ?
+#endif
+#if define UNIX_MISC
+#else
+  #error UNIX_MISC or WIN_MISC not defined.  Maybe you did not define one of T_LINUX/T_MINGW/T_MACOSX/etc ?
+#endif
 #define ANSI_TTY
 #endif
 
 #ifdef T_POSIX
 #define NO_AUDIO
-#define UNIX_TIME
-#define UNIX_MISC
+#if define UNIX_TIME
+#else
+  #error UNIX_TIME or WIN_TIME not defined.  Maybe you did not define one of T_LINUX/T_MINGW/T_MACOSX/etc ?
+#endif
+#if define UNIX_MISC
+#else
+  #error UNIX_MISC or WIN_MISC not defined.  Maybe you did not define one of T_LINUX/T_MINGW/T_MACOSX/etc ?
+#endif
 #endif
 
 // Make sure NO_AUDIO is set if necessary
@@ -108,24 +144,24 @@
 #endif
 #endif
 #endif
-/* 
+/*
  *
  * Created: 29.03.2018
  *
  * Authors:
- * 
+ *
  * Assembled from the code released on Stackoverflow by:
  *   Dennis (instructable.com/member/nqtronix)    |   https://stackoverflow.com/questions/23032002/c-c-how-to-get-integer-unix-timestamp-of-build-time-not-string
  * and
  *   Alexis Wilke                                 |   https://stackoverflow.com/questions/10538444/do-you-know-of-a-c-macro-to-compute-unix-time-and-date
  *
  * Assembled by Jean Rabault
- * 
+ *
  * UNIX_TIMESTAMP gives the UNIX timestamp (unsigned long integer of seconds since 1st Jan 1970) of compilation from macros using the compiler defined __TIME__ macro.
  * This should include Gregorian calendar leap days, in particular the 29ths of February, 100 and 400 years modulo leaps.
- * 
+ *
  * Careful: __TIME__ is the local time of the computer, NOT the UTC time in general!
- * 
+ *
  */
 
 #ifndef COMPILE_TIME_H_
@@ -205,19 +241,6 @@
 #define UNIX_TIMESTAMP (_UNIX_TIMESTAMP(__TIME_YEARS__, __TIME_MONTH__, __TIME_DAYS__, __TIME_HOURS__, __TIME_MINUTES__, __TIME_SECONDS__))
 
 #endif
-// Make sure one of the _TIME macros is set
-#ifndef UNIX_TIME
-#ifndef WIN_TIME
-#error UNIX_TIME or WIN_TIME not defined.  Maybe you did not define one of T_LINUX/T_MINGW/T_MACOSX/etc ?
-#endif
-#endif
-
-// Make sure one of the _MISC macros is set
-#ifndef UNIX_MISC
-#ifndef WIN_MISC
-#error UNIX_MISC or WIN_MISC not defined.  Maybe you did not define one of T_LINUX/T_MINGW/T_MACOSX/etc ?
-#endif
-#endif
 
 #include <stdio.h>
 #include <math.h>
@@ -291,7 +314,7 @@ void debug(char *fmt, ...) ;
 void warn(char *fmt, ...) ;
 void * Alloc(size_t len) ;
 char * StrDup(char *str) ;
-inline int calcNow() ;
+int calcNow() ;
 void loop() ;
 void outChunk() ;
 void corrVal(int ) ;
@@ -337,19 +360,19 @@ void create_slide(int ac, char **av);
 void CALLBACK win32_audio_callback(HWAVEOUT, UINT, DWORD, DWORD, DWORD);
 #endif
 #ifdef MAC_AUDIO
-OSStatus mac_callback(AudioDeviceID, const AudioTimeStamp *, const AudioBufferList *, 
-		      const AudioTimeStamp *, AudioBufferList *, const AudioTimeStamp *, 
+OSStatus mac_callback(AudioDeviceID, const AudioTimeStamp *, const AudioBufferList *,
+		      const AudioTimeStamp *, AudioBufferList *, const AudioTimeStamp *,
 		      void *inClientData);
 #endif
 
 #define NL "\n"
 
-void 
+void
 help() {
-   printf("SBaGen - Sequenced Binaural Beat Generator, version " VERSION 
+   printf("SBaGen - Sequenced Binaural Beat Generator, version " VERSION
 	  NL "Copyright (c) 1999-2007 Jim Peters, http://uazu.net/, all rights "
 	  NL "  reserved, released under the GNU GPL v2.  See file COPYING."
-	  NL 
+	  NL
 	  NL "Usage: sbagen [options] seq-file ..."
 	  NL "       sbagen [options] -i tone-specs ..."
 	  NL "       sbagen [options] -p pre-programmed-sequence-specs ..."
@@ -406,12 +429,12 @@ help() {
    exit(0);
 }
 
-void 
+void
 usage() {
-  error("SBaGen - Sequenced Binaural Beat Generator, version " VERSION 
+  error("SBaGen - Sequenced Binaural Beat Generator, version " VERSION
 	NL "Copyright (c) 1999-2007 Jim Peters, http://uazu.net/, all rights "
 	NL "  reserved, released under the GNU GPL v2.  See file COPYING."
-	NL 
+	NL
 	NL "Usage: sbagen [options] seq-file ..."
 	NL "       sbagen [options] -i tone-specs ..."
 	NL "       sbagen [options] -p pre-programmed-sequence-specs ..."
@@ -456,7 +479,7 @@ struct Channel {
   int typ;			// Current type: 0 off, 1 binaural, 2 pink noise, 3 bell, 4 spin,
    				//   5 mix, 6 mixspin, 7 mixbeat, -1 to -100 wave00 to wave99
   int amp, amp2;		// Current state, according to current type
-  int inc1, off1;		//  ::  (for binaural tones, offset + increment into sine 
+  int inc1, off1;		//  ::  (for binaural tones, offset + increment into sine
   int inc2, off2;		//  ::   table * 65536)
 };
 
@@ -545,42 +568,42 @@ char *opt_d= "/dev/dsp";	// Output device
 FILE *mix_in;			// Input stream for mix sound data, or 0
 int mix_cnt;			// Version number from mix filename (#<digits>), or -1
 int bigendian;			// Is this platform Big-endian?
-int mix_flag= 0;		// Has 'mix/*' been used in the sequence? */
+int mix_flag= 0;		// Has 'mix/*' been used in the sequence?
 
-int opt_c;			// Number of -c option points provided (max 16) */
-struct AmpAdj { 
+int opt_c;			// Number of -c option points provided (max 16)
+struct AmpAdj {
    double freq, adj;
-} ampadj[16];			// List of maximum 16 (freq,adj) pairs, freq-increasing order */
+} ampadj[16];			// List of maximum 16 (freq,adj) pairs, freq-increasing order
 
-char *pdir;			// Program directory (used as second place to look for -m files) */
+char *pdir;			// Program directory (used as second place to look for -m files)
 
 #ifdef WIN_AUDIO
  #define BUFFER_COUNT 8
  #define BUFFER_SIZE 8192*4
  HWAVEOUT aud_handle;
  WAVEHDR *aud_head[BUFFER_COUNT];
- int aud_current;		// Current header */
- int aud_cnt;			// Number of headers in use */
+ int aud_current;		// Current header
+ int aud_cnt;			// Number of headers in use
 #endif
 
 #ifdef MAC_AUDIO
  #define BUFFER_COUNT 8
  #define BUFFER_SIZE 4096*4
  char aud_buf[BUFFER_COUNT][BUFFER_SIZE];
- int aud_rd;	// Next buffer to read out of list (to send to device)*/
- int aud_wr;	// Next buffer to write.  aud_rd==aud_wr means empty buffer list */
+ int aud_rd;	// Next buffer to read out of list (to send to device)
+ int aud_wr;	// Next buffer to write.  aud_rd==aud_wr means empty buffer list
  static AudioDeviceID aud_dev;
 #endif
 
 #ifdef ALSA_AUDIO
 snd_pcm_t *playback_handle;
 #endif
-/**
+//
 //	Delay for a short period of time (in ms)
-*/
+//
 
 #ifdef UNIX_MISC
-void 
+void
 delay(int ms) {
    struct timespec ts;
    ts.tv_sec= ms / 1000;
@@ -589,32 +612,35 @@ delay(int ms) {
 }
 #endif
 #ifdef WIN_MISC
-void 
+void
 delay(int ms) {
    Sleep(ms);
 }
 #endif
 
 
-/**
+//
 //	WAV/OGG/MP3 input data buffering
-//*/
+//
+void
+delay(int ms);
 
-int *inbuf;		// Buffer for input data (as 20-bit samples) */
-int ib_len;		// Length of input buffer (in ints) */
-volatile int ib_rd;	// Read-offset in inbuf */
-volatile int ib_wr;	// Write-offset in inbuf */
-volatile int ib_eof;	// End of file flag*/
-int ib_cycle= 100;	// Time in ms for a complete loop through the buffer*/
-int (*ib_read)(int*,int);  // Routine to refill buffer */
+int *inbuf;		// Buffer for input data (as 20-bit samples)
+int ib_len;		// Length of input buffer (in ints)
+volatile int ib_rd;	// Read-offset in inbuf
+volatile int ib_wr;	// Write-offset in inbuf
+volatile int ib_eof;	// End of file flag
+int ib_cycle= 100;	// Time in ms for a complete loop through the buffer
+int (*ib_read)(int*,int);  // Routine to refill buffer
 
-int 
+int
 inbuf_loop(void *vp) {
    int now= -1;
-   int waited= 0;	/** Used to bail out if the main thread dies for some reason */
+   int waited= 0;	// Used to bail out if the main thread dies for some reason
    int a;
 
    while (1) {
+
       int rv;
       int rd= ib_rd;
       int wr= ib_wr;
@@ -622,10 +648,10 @@ inbuf_loop(void *vp) {
       if (cnt > ib_len-wr) cnt= ib_len-wr;
       if (cnt > ib_len/8) cnt= ib_len/8;
 
-      /** Choose to only work in ib_len/8 units, although this is not
-      // 100% necessary */
+      // Choose to only work in ib_len/8 units, although this is not
+      // 100% necessary
       if (cnt < ib_len/8) {
-	 // Wait a little while for the buffer to empty (minimum 1ms) */
+	 // Wait a little while for the buffer to empty (minimum 1ms)
 	 if (waited > 10000 + ib_cycle)
 	    error("Mix stream halted for more than 10 seconds; aborting");
 	 delay(a= 1+ib_cycle/4);
@@ -633,7 +659,7 @@ inbuf_loop(void *vp) {
 	 continue;
       }
       waited= 0;
-      
+
       rv= ib_read(inbuf+wr, cnt);
       //debug("ib_read %d-%d (%d) -> %d", wr, wr+cnt-1, cnt, rv);
       if (rv != cnt) {
@@ -655,16 +681,16 @@ inbuf_loop(void *vp) {
    return 0;
 }
 
-/**
+//
 //	Read a chunk of int data from the input buffer.  This will
 //	always return enough data unless we have hit the end of the
 //	file, in which case it returns a lower number or 0.  If not
 //	enough data has been read by the input thread, then this
 //	thread pauses until data is ready -- but this should hopefully
 //	never happen.
-*/
+//
 
-int 
+int
 inbuf_read(int *dst, int dlen) {
    int rv= 0;
    int waited= 0;	/** As a precaution, bail out if other thread hangs for some reason*/
@@ -684,7 +710,7 @@ inbuf_read(int *dst, int dlen) {
 	 // Necessary to wait for incoming mix data.  This should
 	 // never happen in normal running, though, unless we are
 	 // outputting to a file
-	 if (waited > 10000) 
+	 if (waited > 10000)
 	    error("Mix stream problem; waited more than 10 seconds for data; aborting");
 	 //debug("Waiting for input thread (%d)", ib_eof);
 	 delay(a= ib_cycle/4 > 100 ? 100 : 1+ib_cycle/4);
@@ -692,7 +718,7 @@ inbuf_read(int *dst, int dlen) {
 	 continue;
       }
       waited= 0;
-      
+
       memcpy(dst, inbuf+rd, avail * sizeof(int));
       dst += avail;
       dlen -= avail;
@@ -706,7 +732,7 @@ inbuf_read(int *dst, int dlen) {
 //	Start off the thread that fills the buffer
 /**/
 
-void 
+void
 inbuf_start(int(*rout)(int*,int), int len) {
    if (0 != (len & (len-1)))
       error("inbuf_start() called with length not a power of two");
@@ -758,12 +784,12 @@ inline int t_mid(int t0, int t1) {		/** Midpoint of period from t0 to t1 */
 }
 
 
-int 
+int
 main(int argc, char **argv) {
    short test= 0x1100;
    int rv;
    char *p;
-   
+
    pdir= StrDup(argv[0]);
    p= strchr(pdir, 0);
    while (p > pdir && p[-1] != '/' && p[-1] != '\\') *--p= 0;
@@ -771,12 +797,12 @@ main(int argc, char **argv) {
    argc--; argv++;
    init_sin_table();
    bigendian= ((char*)&test)[0] != 0;
-   
+
    // Process all the options
    rv= scanOptions(&argc, &argv);
-   
+
    if (argc < 1) usage();
-   
+
    if (rv == 'i') {
       /** Immediate mode */
       readSeqImm(argc, argv);
@@ -789,7 +815,7 @@ main(int argc, char **argv) {
       if (argc < 1) usage();
       readSeq(argc, argv);
    }
-   
+
    if (opt_W && !opt_o && !opt_O)
       error("Use -o or -O with the -W option");
    if (opt_W && opt_L < 0 && !opt_E) {
@@ -797,16 +823,16 @@ main(int argc, char **argv) {
       fprintf(stderr, "(Use -L or -E with the -W option to control the length of the WAV file)\n\n");
       opt_L= 60*60*1000;
    }
-   
+
    mix_in= 0;
    if (opt_M || opt_m) {
       char *p;
       char tmp[4];
       int raw= 1;
       if (opt_M) {
-	 mix_in= stdin; 
+	 mix_in= stdin;
 	 tmp[0]= 0;
-      } 
+      }
       if (opt_m) {
 	 // Pick up #<digits> on end of filename
 	 p= strchr(opt_m, 0);
@@ -815,12 +841,12 @@ main(int argc, char **argv) {
 	    mix_cnt= 0;
 	    while (p > opt_m && isdigit(p[-1]))
 	       mix_cnt= mix_cnt * 10 + *--p - '0';
-	    if (p > opt_m && p[-1] == '#') 
+	    if (p > opt_m && p[-1] == '#')
 	       *--p= 0;
 	    else {
 	       p= strchr(opt_m, 0);
 	       mix_cnt= -1;
-	    } 
+	    }
 	 }
 	 // p points to end of filename (NUL)
 
@@ -865,7 +891,7 @@ main(int argc, char **argv) {
       // buffer (3s@44.1kHz)
       if (raw) inbuf_start(raw_mix_in, 256*1024);
    }
-   
+
    loop();
    return 0;
 }
@@ -876,7 +902,7 @@ main(int argc, char **argv) {
 //	(-i option), 'p' -p option.
 //
 
-int 
+int
 scanOptions(int *acp, char ***avp) {
    int argc= *acp;
    char **argv= *avp;
@@ -901,18 +927,18 @@ scanOptions(int *acp, char ***avp) {
 	     if (!fast_mult) fast_mult= 1; 		/** Don't try to sync with real time **/
 	     break;
 	  case 'L':
-	     if (argc-- < 1 || 0 == (val= readTime(*argv, &opt_L)) || 
-		 1 == sscanf(*argv++ + val, " %c", &dmy)) 
+	     if (argc-- < 1 || 0 == (val= readTime(*argv, &opt_L)) ||
+		 1 == sscanf(*argv++ + val, " %c", &dmy))
 		error("-L expects hh:mm or hh:mm:ss time");
 	     break;
 	  case 'T':
-	     if (argc-- < 1 || 0 == (val= readTime(*argv, &opt_T)) || 
-		 1 == sscanf(*argv++ + val, " %c", &dmy)) 
+	     if (argc-- < 1 || 0 == (val= readTime(*argv, &opt_T)) ||
+		 1 == sscanf(*argv++ + val, " %c", &dmy))
 		error("-T expects hh:mm or hh:mm:ss time");
 	     if (!fast_mult) fast_mult= 1;		// Don't try to sync with real time
 	     break;
 	  case 'F':
-	     if (argc-- < 1 || 1 != sscanf(*argv++, "%d %c", &fade_int, &dmy)) 
+	     if (argc-- < 1 || 1 != sscanf(*argv++, "%d %c", &fade_int, &dmy))
 		error("-F expects fade-time in ms");
 	     break;
 	  case 'c':
@@ -930,9 +956,9 @@ scanOptions(int *acp, char ***avp) {
 	  case 'W': opt_W= 1;
 	     if (!fast_mult) fast_mult= 1; 		// Don't try to sync with real time
 	     break;
-	  case 'q': 
+	  case 'q':
 	     opt_S= 1;
-	     if (argc-- < 1 || 1 != sscanf(*argv++, "%d %c", &fast_mult, &dmy)) 
+	     if (argc-- < 1 || 1 != sscanf(*argv++, "%d %c", &fast_mult, &dmy))
 		error("Expecting an integer after -q");
 	     if (fast_mult < 1) fast_mult= 1;
 	     break;
@@ -943,7 +969,7 @@ scanOptions(int *acp, char ***avp) {
 	     break;
 #ifndef MAC_AUDIO
 	  case 'b':
-	     if (argc-- < 1 || 
+	     if (argc-- < 1 ||
 		 1 != sscanf(*argv++, "%d %c", &val, &dmy) ||
 		 !(val == 8 || val == 16))
 		error("Expecting -b 8 or -b 16");
@@ -966,9 +992,9 @@ scanOptions(int *acp, char ***avp) {
 	     if (argc-- < 1) error("Expecting device filename after -d");
 	     opt_d= *argv++;
 	     break;
-#endif             
+#endif
 	  case 'R':
-	     if (argc-- < 1 || 1 != sscanf(*argv++, "%d %c", &out_prate, &dmy)) 
+	     if (argc-- < 1 || 1 != sscanf(*argv++, "%d %c", &out_prate, &dmy))
 		error("Expecting integer after -R");
 	     break;
 	  default:
@@ -987,7 +1013,7 @@ scanOptions(int *acp, char ***avp) {
 //	for scanOptions.
 //
 
-void 
+void
 handleOptions(char *str0) {
    // Always StrDup() string and don't bother to free(), as normal
    // argv[] strings stick around for the life of the program
@@ -1012,7 +1038,7 @@ handleOptions(char *str0) {
       char **av= argv;
       int ac= argc;
       int rv;
-      
+
       rv= scanOptions(&ac, &av);
 
       if (rv == 'i') {
@@ -1030,17 +1056,17 @@ handleOptions(char *str0) {
 //	Setup the ampadj[] array from the given -c spec-string
 //
 
-void 
+void
 setupOptC(char *spec) {
    char *p= spec, *q;
    int a, b;
-   
+
    while (1) {
       while (isspace(*p) || *p == ',') p++;
       if (!*p) break;
 
       if (opt_c >= sizeof(ampadj) / sizeof(ampadj[0]))
-	 error("Too many -c option frequencies; maxmimum is %d", 
+	 error("Too many -c option frequencies; maxmimum is %d",
 	       sizeof(ampadj) / sizeof(ampadj[0]));
 
       ampadj[opt_c].freq= strtod(p, &q);
@@ -1053,14 +1079,14 @@ setupOptC(char *spec) {
 
    // Sort the list
    for (a= 0; a<opt_c; a++)
-      for (b= a+1; b<opt_c; b++) 
+      for (b= a+1; b<opt_c; b++)
 	 if (ampadj[a].freq > ampadj[b].freq) {
 	    double tmp;
 	    tmp= ampadj[a].freq; ampadj[a].freq= ampadj[b].freq; ampadj[b].freq= tmp;
 	    tmp= ampadj[a].adj; ampadj[a].adj= ampadj[b].adj; ampadj[b].adj= tmp;
 	 }
    return;
-      
+
  bad:
    error("Bad -c option spec; expecting <freq>=<amp>[,<freq>=<amp>]...:\n  %s", spec);
 }
@@ -1073,14 +1099,14 @@ setupOptC(char *spec) {
 //	the right rate, then tough!
 //
 
-void 
+void
 find_wav_data_start(FILE *in) {
    unsigned char buf[16];
 
    if (1 != fread(buf, 12, 1, in)) goto bad;
    if (0 != memcmp(buf, "RIFF", 4)) goto bad;
    if (0 != memcmp(buf+8, "WAVE", 4)) goto bad;
-   
+
    while (1) {
       int len;
       if (1 != fread(buf, 8, 1, in)) goto bad;
@@ -1107,11 +1133,11 @@ find_wav_data_start(FILE *in) {
 //	32-bit values (max 'dlen')
 //
 
-int 
+int
 raw_mix_in(int *dst, int dlen) {
    short *tmp= (short*)(dst + dlen/2);
    int a, rv;
-   
+
    rv= fread(tmp, 2, dlen, mix_in);
    if (rv == 0) {
       if (feof(mix_in))
@@ -1128,20 +1154,20 @@ raw_mix_in(int *dst, int dlen) {
 	 rd += 2;
       }
    } else {
-      for (a= 0; a<rv; a++) 
+      for (a= 0; a<rv; a++)
 	 *dst++= *tmp++ << 4;
    }
 
    return rv;
 }
 
-   
+
 
 //
 //	Update a status line
 //
 
-void 
+void
 status(char *err) {
   int a;
   int nch= N_CH;
@@ -1191,10 +1217,10 @@ dispCurrPer(FILE *fp) {
 
   p0= buf;
   p1= buf_copy;
-  
+
   p0 += sprintf(p0, "* ");
   p0 += sprintTime(p0, per->tim);
-  p1 += sprintf(p1, "  ");	
+  p1 += sprintf(p1, "  ");
   p1 += sprintTime(p1, per->nxt->tim);
 
   v0= per->v0; v1= per->v1;
@@ -1246,14 +1272,14 @@ sprintVoice(char *p, Voice *vp, Voice *dup) {
     default:
        if (vp->typ < -100 || vp->typ > -1)
 	  return sprintf(p, " ERROR");
-       if (dup && vp->typ == dup->typ && 
+       if (dup && vp->typ == dup->typ &&
 	   vp->carr == dup->carr && vp->res == dup->res && vp->amp == dup->amp)
 	  return sprintf(p, "  ::");
        return sprintf(p, " wave%02d:%.2f%+.2f/%.2f", -1-vp->typ, vp->carr, vp->res, AMP_AD(vp->amp));
    }
 }
 
-void 
+void
 init_sin_table() {
   int a;
   int *arr= (int*)Alloc(ST_SIZ * sizeof(int));
@@ -1264,7 +1290,7 @@ init_sin_table() {
   sin_table= arr;
 }
 
-void 
+void
 error(char *fmt, ...) {
   va_list ap; va_start(ap, fmt);
   vfprintf(stderr, fmt, ap);
@@ -1275,23 +1301,20 @@ error(char *fmt, ...) {
   getchar();
 #endif
   exit(1);
-  va_end(ap);
 }
 
-void 
+void
 debug(char *fmt, ...) {
   va_list ap; va_start(ap, fmt);
   vfprintf(stderr, fmt, ap);
   fprintf(stderr, "\n");
-  va_end(ap);
 }
 
-void 
+void
 warn(char *fmt, ...) {
   va_list ap; va_start(ap, fmt);
   vfprintf(stderr, fmt, ap);
   fprintf(stderr, "\n");
-  va_end(ap);
 }
 
 void *
@@ -1321,9 +1344,9 @@ setupRefTime() {
   tt= localtime(&tim);
   time_ref_epoch= tim;
   time_ref_ms= 1000*tt->tm_sec + 60000*tt->tm_min + 3600000*tt->tm_hour;
-}  
+}
 
-inline int  
+inline int
 calcNow() {
   struct timeval tv;
   if (0 != gettimeofday(&tv, 0)) error("Can't get current time");
@@ -1333,7 +1356,7 @@ calcNow() {
 #endif
 
 #ifdef WIN_TIME
-inline int  
+inline int
 calcNow() {
   SYSTEMTIME st;
   GetLocalTime(&st);
@@ -1342,7 +1365,7 @@ calcNow() {
 #endif
 
 #if DEBUG_CHK_UTIME
-inline int 
+inline int
 userTime() {
   struct tms buf;
   times(&buf);
@@ -1387,7 +1410,7 @@ int nt_off;
 int noise_buf[256];
 uchar noise_off= 0;
 
-static inline int 
+static inline int
 noise2() {
   int tot;
   int off= nt_off++;
@@ -1416,14 +1439,14 @@ noise2() {
 	//	as the sin_table[].  This version uses a library random number
 	//	generator, and no smoothing.
 	//
-	
-	inline double 
+
+	inline double
 	noise() {
 	  int tot= 0;
 	  int bit= ~0;
 	  int a;
 	  int off;
-	
+
 	  ns_tbl[ns_off]= (rand() - (RAND_MAX / 2)) / (NS_BIT + 1);
 	  off= ns_off;
 	  for (a= 0; a<=NS_BIT; a++, bit <<= 1) {
@@ -1431,17 +1454,16 @@ noise2() {
 	    tot += ns_tbl[off];
 	  }
 	  ns_off= (ns_off + 1) & ((1<<NS_BIT) - 1);
-	
+
 	  return tot * (ST_AMP / (RAND_MAX * 0.5));
 	}
-
 
 //
 //	Play loop
 //
 
-void 
-loop() {	
+void
+loop() {
   int c, cnt;
   int err;		// Error to add to 'now' until next cnt==0
   int fast= fast_mult != 0;
@@ -1475,7 +1497,7 @@ loop() {
   corrVal(0);		// Get into correct period
   dispCurrPer(stderr);	// Display
   status(0);
-  
+
   while (1) {
     for (c= 0; c < cnt; c++) {
       corrVal(1);
@@ -1496,7 +1518,7 @@ loop() {
       char buf[32];
       int diff= calcNow() - now;
       if (abs(diff) > H12) diff= 0;
-      sprintf(buf, "(%d)", diff); 
+      sprintf(buf, "(%d)", diff);
 
       err_lo= diff * 0x10000 / cnt;
       err= err_lo >> 16;
@@ -1523,7 +1545,7 @@ loop() {
 
 int rand0, rand1;
 
-void 
+void
 outChunk() {
    int off= 0;
 
@@ -1535,7 +1557,7 @@ outChunk() {
       }
       while (rv < out_blen) tmp_buf[rv++]= 0;
    }
-   
+
    while (off < out_blen) {
       int ns= noise2();		// Use same pink noise source for everything
       int tot1, tot2;		// Left and right channels
@@ -1554,7 +1576,7 @@ outChunk() {
       } else {
 	 tot1= tot2= 0;
       }
-      
+
       ch= &chan[0];
       for (a= 0; a<N_CH; a++, ch++) switch (ch->typ) {
        case 0:
@@ -1610,14 +1632,14 @@ outChunk() {
       // // Add pink noise as dithering*/
       // tot1 += (ns >> NS_DITHER) + 0x8000;*/
       // tot2 += (ns >> NS_DITHER) + 0x8000;*/
-      
+
       // // Add white noise as dithering*/
       // tot1 += (seed >> 1) + 0x8000;*/
       // tot2 += (seed >> 1) + 0x8000;*/
 
       // White noise dither; you could also try (rand0-rand1) for a*/
       // dither with more high frequencies*/
-      rand0= rand1; 
+      rand0= rand1;
       rand1= (rand0 * 0x660D + 0xF35F) & 0xFFFF;
       if (tot1 <= 0x7FFF0000) tot1 += rand0;
       if (tot2 <= 0x7FFF0000) tot2 += rand0;
@@ -1669,9 +1691,9 @@ outChunk() {
   }
   else
     writeOut((char*)out_buf, out_bsiz);
-} 
+}
 
-void 
+void
 writeOut(char *buf, int siz) {
   int rv;
 
@@ -1701,8 +1723,8 @@ writeOut(char *buf, int siz) {
         waveOutGetErrorText(rv, buf, sizeof(buf)-1);
         error("Error writing a fragment to the audio device:\n  %s", buf);
      }
-   
-     aud_cnt++; 
+
+     aud_cnt++;
      aud_current++;
      aud_current %= BUFFER_COUNT;
 
@@ -1724,10 +1746,10 @@ writeOut(char *buf, int siz) {
   }
 #endif
 
-  
+
 #ifdef ALSA_AUDIO
   long frames_written, frames_to_write=siz/4; //i think 4  because stereo, 2 bytes per sample*/
-  
+
   if (out_fd == -9999) {
     //printf("siz:%d\n",siz);
     while(frames_to_write>0){
@@ -1744,7 +1766,7 @@ writeOut(char *buf, int siz) {
   }
 #endif
 
-  
+
   while (-1 != (rv= write(out_fd, buf, siz))) {
     if (0 == (siz -= rv)) return;
     buf += rv;
@@ -1752,11 +1774,11 @@ writeOut(char *buf, int siz) {
   error("Output error");
 }
 
-/**
+//**
 //	Calculate amplitude adjustment factor for frequency 'freq'
-*/
+///**/
 
-double 
+double
 ampAdjust(double freq) {
    int a;
    struct AmpAdj *p0, *p1;
@@ -1765,23 +1787,23 @@ ampAdjust(double freq) {
    if (freq <= ampadj[0].freq) return ampadj[0].adj;
    if (freq >= ampadj[opt_c-1].freq) return ampadj[opt_c-1].adj;
 
-   for (a= 1; a<opt_c; a++) 
-      if (freq < ampadj[a].freq) 
+   for (a= 1; a<opt_c; a++)
+      if (freq < ampadj[a].freq)
 	 break;
-   
+
    p0= &ampadj[a-1];
    p1= &ampadj[a];
-      
+
    return p0->adj + (p1->adj - p0->adj) * (freq - p0->freq) / (p1->freq - p0->freq);
 }
-   
-/**
+
+/***/
 //
 //	Correct channel values and types according to current period,
 //	and current time
 //*/
 
-void 
+void
 corrVal(int running) {
    int a;
    int t0= per->tim;
@@ -1790,7 +1812,7 @@ corrVal(int running) {
    Voice *v0, *v1, *vv;
    double rat0, rat1;
    int trigger= 0;
-   
+
    // Move to the correct period*/
    while ((now >= t0) ^ (now >= t1) ^ (t1 > t0)) {
       per= per->nxt;
@@ -1798,10 +1820,10 @@ corrVal(int running) {
       t1= per->nxt->tim;
       if (running) {
 	 if (tty_erase) {
-#ifdef ANSI_TTY	
+#ifdef ANSI_TTY
 	    fprintf(stderr, "\033[K");
 #else
-	    fprintf(stderr, "%*s\r", tty_erase, ""); 
+	    fprintf(stderr, "%*s\r", tty_erase, "");
 	    tty_erase= 0;
 #endif
 	 }
@@ -1809,7 +1831,7 @@ corrVal(int running) {
       }
       trigger= 1;		// Trigger bells or whatever*/
    }
-   
+
    // Run through to calculate voice settings for current time*/
    rat1= t_per0(t0, now) / (double)t_per24(t0, t1);
    rat0= 1 - rat1;
@@ -1818,7 +1840,7 @@ corrVal(int running) {
       v0= &per->v0[a];
       v1= &per->v1[a];
       vv= &ch->v;
-      
+
       if (vv->typ != v0->typ) {
 	 switch (vv->typ= ch->typ= v0->typ) {
 	  case 1:
@@ -1835,7 +1857,7 @@ corrVal(int running) {
 	     ch->off1= ch->off2= 0; break;
 	 }
       }
-      
+
       // Setup vv->**/
       switch (vv->typ) {
        case 1:
@@ -1867,7 +1889,7 @@ corrVal(int running) {
 	  break;
       }
    }
-   
+
    // Check and limit amplitudes if -c option in use*/
    if (opt_c) {
       double tot_beat= 0, tot_other= 0;
@@ -1889,17 +1911,17 @@ corrVal(int running) {
 	    vv= &chan[a].v;
 	    if (vv->typ == 1)
 	       vv->amp *= adj_beat;
-	    else if (vv->typ) 	
+	    else if (vv->typ)
 	       vv->amp *= adj_other;
 	 }
       }
    }
-   
+
    // Setup Channel data from Voice data*/
    for (a= 0; a<N_CH; a++) {
       ch= &chan[a];
       vv= &ch->v;
-      
+
       // Setup ch->* from vv->**/
       switch (vv->typ) {
 	 double freq1, freq2;
@@ -1909,7 +1931,7 @@ corrVal(int running) {
 	  if (opt_c) {
 	     ch->amp= vv->amp * ampAdjust(freq1);
 	     ch->amp2= vv->amp * ampAdjust(freq2);
-	  } else 
+	  } else
 	     ch->amp= ch->amp2= (int)vv->amp;
 	  ch->inc1= (int)(freq1 / out_rate * ST_SIZ * 65536);
 	  ch->inc2= (int)(freq2 / out_rate * ST_SIZ * 65536);
@@ -1937,18 +1959,18 @@ corrVal(int running) {
 	  ch->amp= (int)vv->amp;
 	  ch->inc1= (int)((vv->carr + vv->res/2) / out_rate * ST_SIZ * 65536);
 	  ch->inc2= (int)((vv->carr - vv->res/2) / out_rate * ST_SIZ * 65536);
-	  if (ch->inc1 > ch->inc2) 
+	  if (ch->inc1 > ch->inc2)
 	     ch->inc2= -ch->inc2;
-	  else 
+	  else
 	     ch->inc1= -ch->inc1;
 	  break;
       }
    }
-}       
-      
-/**
+}
+
+//
 //	Setup audio device
-*/
+//*/
 
 void
 setup_device(void) {
@@ -1994,31 +2016,31 @@ setup_device(void) {
     while (1) {
        if (0 > (out_fd= open(opt_d, O_WRONLY)))
 	  error("Can't open %s, errno %d", opt_d, errno);
-       
-       afmt= afmt_req= ((out_mode == 0) ? AFMT_U8 : 
+
+       afmt= afmt_req= ((out_mode == 0) ? AFMT_U8 :
 			((char*)&test)[0] ? AFMT_S16_LE : AFMT_S16_BE);
        stereo= 1;
        rate= out_rate;
        numfrags= (out_rate * 4 * targ_ms / 1000) >> fragsize;
        if (numfrags < 1) numfrags= 1;
        enc= (numfrags<<16) | fragsize;
-       
+
        if (0 > ioctl(out_fd, SNDCTL_DSP_SETFRAGMENT, &enc) ||
 	   0 > ioctl(out_fd, SNDCTL_DSP_SAMPLESIZE, &afmt) ||
 	   0 > ioctl(out_fd, SNDCTL_DSP_STEREO, &stereo) ||
 	   0 > ioctl(out_fd, SNDCTL_DSP_SPEED, &rate))
 	  error("Can't configure %s, errno %d", opt_d, errno);
-       
-       if (afmt != afmt_req) 
+
+       if (afmt != afmt_req)
 	  error("Can't open device in %d-bit mode", out_mode ? 16 : 8);
        if (!stereo)
 	  error("Can't open device in stereo");
-       
+
        out_rate= rate;
-       
+
        if (-1 == ioctl(out_fd, SNDCTL_DSP_GETOSPACE, &info))
 	  error("Can't get audio buffer info, errno %d", errno);
-v
+
        if (!retry && info.fragsize != (1<<fragsize)) {
 	  // We've received a different fragment size to what we asked
 	  // for.  This means that the numfrags calculation is wrong.
@@ -2031,7 +2053,7 @@ v
        }
        break;
     }
-    
+
     out_bsiz= info.fragsize;
     out_blen= out_mode ? out_bsiz/2 : out_bsiz;
     out_bps= out_mode ? 4 : 2;
@@ -2040,7 +2062,7 @@ v
     out_buf_ms= out_buf_lo >> 16;
     out_buf_lo &= 0xFFFF;
     tmp_buf= (int*)Alloc(out_blen * sizeof(int));
-    
+
     if (!opt_Q)
        warn("Outputting %d-bit audio at %d Hz with %d %d-sample fragments, %d ms per fragment",
 	    out_mode ? 16 : 8, out_rate, info.fragstotal, out_blen/2, out_buf_ms);
@@ -2053,7 +2075,7 @@ v
      WAVEFORMATEX fmt;
      int a;
 
-     fmt.wFormatTag= WAVE_FORMAT_PCM;           
+     fmt.wFormatTag= WAVE_FORMAT_PCM;
      fmt.nChannels= 2;
      fmt.nSamplesPerSec= out_rate;
      fmt.wBitsPerSample= out_mode ? 16 : 8;
@@ -2062,15 +2084,15 @@ v
      fmt.cbSize= 0;
      aud_handle= NULL;
 
-     // if (MMSYSERR_NOERROR != 
-     //    waveOutOpen(&aud_handle, WAVE_MAPPER, &fmt, 0, 
+     // if (MMSYSERR_NOERROR !=
+     //    waveOutOpen(&aud_handle, WAVE_MAPPER, &fmt, 0,
      //                0L, WAVE_FORMAT_QUERY))
      //    error("Windows is rejecting our audio request (%d-bit stereo, %dHz)",
      //          out_mode ? 16 : 8, out_rate);*/
 
-     if (MMSYSERR_NOERROR != 
-	 (rv= waveOutOpen(&aud_handle, WAVE_MAPPER, 
-			  (WAVEFORMATEX*)&fmt, (DWORD)win32_audio_callback, 
+     if (MMSYSERR_NOERROR !=
+	 (rv= waveOutOpen(&aud_handle, WAVE_MAPPER,
+			  (WAVEFORMATEX*)&fmt, (DWORD)win32_audio_callback,
 			  (DWORD)0, CALLBACK_FUNCTION))) {
 	char buf[255];
 	waveOutGetErrorText(rv, buf, sizeof(buf)-1);
@@ -2082,7 +2104,7 @@ v
 	error("Can't open audio device in stereo");
      if (fmt.wBitsPerSample != (out_mode ? 16 : 8))
 	error("Can't open audio device in %d-bit mode", out_mode ? 16 : 8);
-     
+
      aud_current= 0;
      aud_cnt= 0;
 
@@ -2106,8 +2128,8 @@ v
 	   error("Can't setup a wave header %d:\n  %s", a, buf);
 	}
 	w->dwFlags |= WHDR_DONE;
-     }     
-     
+     }
+
      out_rate= fmt.nSamplesPerSec;
      out_bsiz= BUFFER_SIZE;
      out_blen= out_mode ? out_bsiz/2 : out_bsiz;
@@ -2121,7 +2143,7 @@ v
 
      if (!opt_Q)
 	warn("Outputting %d-bit audio at %d Hz with %d %d-sample fragments, "
-	     "%d ms per fragment", out_mode ? 16 : 8, 
+	     "%d ms per fragment", out_mode ? 16 : 8,
 	     out_rate, BUFFER_COUNT, out_blen/2, out_buf_ms);
   }
 #endif
@@ -2154,33 +2176,33 @@ v
     if ((err= AudioHardwareGetProperty(kAudioHardwarePropertyDefaultOutputDevice,
 				       &propertySize, &aud_dev)))
       error("Get default output device failed, status = %d", (int)err);
-    
+
     if (aud_dev == kAudioDeviceUnknown)
       error("No default audio device found");
-    
+
     // Get device name*/
     propertySize= sizeof(deviceName);
     if ((err= AudioDeviceGetProperty(aud_dev, 1, 0,
 				     kAudioDevicePropertyDeviceName,
 				     &propertySize, deviceName)))
       error("Get audio device name failed, status = %d", (int)err);
-    
+
     // Get device properties*/
     propertySize= sizeof(streamDesc);
     if ((err= AudioDeviceGetProperty(aud_dev, 1, 0,
 				     kAudioDevicePropertyStreamFormat,
-				     &propertySize, &streamDesc))) 
+				     &propertySize, &streamDesc)))
       error("Get audio device properties failed, status = %d", (int)err);
 
     out_rate= (int)streamDesc.mSampleRate;
 
-    if (streamDesc.mChannelsPerFrame != 2) 
+    if (streamDesc.mChannelsPerFrame != 2)
       error("SBaGen requires a stereo output device -- \n"
 	    "default output has %d channels",
 	    streamDesc.mChannelsPerFrame);
 
     if (streamDesc.mFormatID != kAudioFormatLinearPCM ||
-	!(streamDesc.mFormatFlags & kLinearPCMFormatFlagIsFloat)) 
+	!(streamDesc.mFormatFlags & kLinearPCMFormatFlagIsFloat))
       error("Expecting a 32-bit float linear PCM output stream -- \n"
 	    "default output uses another format");
 
@@ -2189,16 +2211,16 @@ v
     propertySize= sizeof(bufferByteCount);
     if ((err= AudioDeviceSetProperty(aud_dev, 0, 0, 0,
 				     kAudioDevicePropertyBufferSize,
-				     propertySize, &bufferByteCount))) 
+				     propertySize, &bufferByteCount)))
       error("Set audio output buffer size failed, status = %d", (int)err);
 
     // Setup callback and start it
     err= AudioDeviceAddIOProc(aud_dev, mac_callback, (void *)1);
     err= AudioDeviceStart(aud_dev, mac_callback);
 
-    // Report settings      
+    // Report settings
     if (!opt_Q) {
-       if (old_out_rate != out_rate && !out_rate_def) 
+       if (old_out_rate != out_rate && !out_rate_def)
 	  warn("*** WARNING: Non-default sampling rates not yet supported on OS X ***");
        warn("Outputting %d-bit audio at %d Hz to \"%s\",\n"
 	    "  using %d %d-sample fragments, %d ms per fragment",
@@ -2211,7 +2233,7 @@ v
   /**boilerplate alsa device init code*/
   int err;
   if ((err = snd_pcm_open (&playback_handle, opt_d, SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
-    fprintf (stderr, "cannot open audio device %s (%s)\n", 
+    fprintf (stderr, "cannot open audio device %s (%s)\n",
              opt_d,
              snd_strerror (err));
     exit (1);
@@ -2242,15 +2264,15 @@ v
     out_buf_lo &= 0xFFFF;
     tmp_buf= (int*)Alloc(out_blen * sizeof(int));
 
-    
+
     out_fd= -9999;
-    
+
 #endif
 #ifdef NO_AUDIO
   error("Direct output to soundcard not supported on this platform.\n"
 	"Use -o or -O to write raw data, or -Wo or -WO to write a WAV file.");
 #endif
-  
+
 }
 
 //
@@ -2259,7 +2281,7 @@ v
 
 #ifdef WIN_AUDIO
 void CALLBACK
-win32_audio_callback(HWAVEOUT hand, UINT uMsg,     
+win32_audio_callback(HWAVEOUT hand, UINT uMsg,
 		     DWORD dwInstance, DWORD dwParam1, DWORD dwParam2) {
    switch (uMsg) {
     case WOM_CLOSE:
@@ -2299,7 +2321,7 @@ OSStatus mac_callback(AudioDeviceID inDevice,
 		      const AudioTimeStamp *inInputTime,
 		      AudioBufferList *outOutputData,
 		      const AudioTimeStamp *inOutputTime,
-		      void *inClientData) 
+		      void *inClientData)
 {
   float *fp= outOutputData->mBuffers[0].mData;
   int cnt= BUFFER_SIZE / 2;
@@ -2314,7 +2336,7 @@ OSStatus mac_callback(AudioDeviceID inDevice,
     while (cnt-- > 0) *fp++= *sp++ * (1/32768.0);
     aud_rd= (aud_rd + 1) % BUFFER_COUNT;
   }
-  
+
   return kAudioHardwareNoError;
 }
 #endif
@@ -2327,7 +2349,7 @@ OSStatus mac_callback(AudioDeviceID inDevice,
 #define addU4(xx) { int a= xx; *p++= a; *p++= (a >>= 8); *p++= (a >>= 8); *p++= (a >>= 8); }
 #define addStr(xx) { char *q= xx; *p++= *q++; *p++= *q++; *p++= *q++; *p++= *q++; }
 
-void 
+void
 writeWAV() {
   char buf[44], *p= buf;
 
@@ -2361,21 +2383,21 @@ writeWAV() {
 //	Read a line, discarding blank lines and comments.  Rets:
 //	Another line?  Comments starting with '##' are displayed on
 //	stderr.
-//   
+//
 
-int 
+int
 readLine() {
    char *p;
    lin= buf;
-   
+
    while (1) {
       if (!fgets(lin, sizeof(buf), in)) {
 	 if (feof(in)) return 0;
 	 error("Read error on sequence file");
       }
-      
+
       in_lin++;
-      
+
       while (isspace(*lin)) lin++;
       p= strchr(lin, '#');
       if (p && p[1] == '#') fprintf(stderr, "%s", p);
@@ -2412,20 +2434,20 @@ getWord() {
 //	Bad sequence file
 //
 
-void 
+void
 badSeq() {
   error("Bad sequence file content at line: %d\n  %s", in_lin, lin_copy);
 }
 
 // Convenience for situations where buffer is being filled by
 // something other than readLine()
-void 
+void
 readNameDef2() {
    lin= buf; lin_copy= buf_copy;
    strcpy(lin_copy, lin);
    readNameDef();
 }
-void 
+void
 readTimeLine2() {
    lin= buf; lin_copy= buf_copy;
    strcpy(lin_copy, lin);
@@ -2433,22 +2455,20 @@ readTimeLine2() {
 }
 
 // Convenience for creating sequences on the fly
-void 
+void
 formatNameDef(char *fmt, ...) {
    va_list ap;
    va_start(ap, fmt);
    vsnprintf(buf, sizeof(buf), fmt, ap);
    readNameDef2();
-   va_end(ap);
 }
-void 
+void
 formatTimeLine(int tim, char *fmt, ...) {
    va_list ap;
    char *p= buf + sprintf(buf, "%02d:%02d:%02d ", tim/3600, tim/60%60, tim%60);
    va_start(ap, fmt);
    vsnprintf(p, buf + sizeof(buf) - p, fmt, ap);
    readTimeLine2();
-   va_end(ap);
 }
 
 //
@@ -2456,7 +2476,7 @@ formatTimeLine(int tim, char *fmt, ...) {
 //	passed in (ac,av)
 //
 
-void 
+void
 readSeqImm(int ac, char **av) {
    char *p= buf;
 
@@ -2464,7 +2484,7 @@ readSeqImm(int ac, char **av) {
    p += sprintf(p, "immediate:");
    while (ac-- > 0) p += sprintf(p, " %s", *av++);
    readNameDef2();
-   
+
    strcpy(buf, "00:00 immediate");
    readTimeLine2();
 
@@ -2476,29 +2496,29 @@ readSeqImm(int ac, char **av) {
 //	structures
 //
 
-void 
+void
 readSeq(int ac, char **av) {
    // Setup a 'now' value to use for NOW in the sequence file
-   now= calcNow();	
+   now= calcNow();
 
    while (ac-- > 0) {
       char *fnam= *av++;
       int start= 1;
-      
+
       in= (0 == strcmp("-", fnam)) ? stdin : fopen(fnam, "r");
       if (!in) error("Can't open sequence file: %s", fnam);
-      
+
       in_lin= 0;
-      
+
       while (readLine()) {
 	 char *p= lin;
 
 	 // Blank lines
 	 if (!*p) continue;
-	 
+
 	 // Look for options
 	 if (*p == '-') {
-	    if (!start) 
+	    if (!start)
 	       error("Options are only permitted at start of sequence file:\n  %s", p);
 	    handleOptions(p);
 	    continue;
@@ -2506,23 +2526,23 @@ readSeq(int ac, char **av) {
 
 	 // Check to see if it fits the form of <name>:<white-space>
 	 start= 0;
-	 if (!isalpha(*p)) 
+	 if (!isalpha(*p))
 	    p= 0;
 	 else {
 	    while (isalnum(*p) || *p == '_' || *p == '-') p++;
-	    if (*p++ != ':' || !isspace(*p)) 
+	    if (*p++ != ':' || !isspace(*p))
 	       p= 0;
 	 }
-	 
+
 	 if (p)
 	    readNameDef();
-	 else 
+	 else
 	    readTimeLine();
       }
-      
+
       if (in != stdin) fclose(in);
    }
-   
+
    correctPeriods();
 }
 
@@ -2533,7 +2553,7 @@ readSeq(int ac, char **av) {
 //
 
 
-void 
+void
 correctPeriods() {
   // Get times all correct
   {
@@ -2596,7 +2616,7 @@ correctPeriods() {
 	  if (qq->v1[a].typ == 3 && pp->fi == -3)
 	    qq->v1[a].typ= 0;
 	}
-	      
+
 	fo= pp->prv->fo;
 	fi= qq->nxt->fi;
 
@@ -2625,14 +2645,14 @@ correctPeriods() {
 	  if ((fo == 0 || fi == 0) ||		// Fade in/out to silence
 	      (vp->typ != vq->typ) ||		// Different types
 	      ((fo == 1 || fi == 1) &&		// Fade thru, but different pitches
-	       (vp->typ == 1 || vp->typ < 0) && 
+	       (vp->typ == 1 || vp->typ < 0) &&
 	       (vp->carr != vq->carr || vp->res != vq->res))
 	      ) {
 	    vp->amp= vq->amp= 0;		// To silence
 	    midpt= 1;				// Definitely need the mid-point
 
 	    if (vq->typ == 3) {	 		// Special handling for bells
-	      vq->amp= qq->v1[a].amp; 
+	      vq->amp= qq->v1[a].amp;
 	      qq->nxt->v0[a].typ= qq->nxt->v1[a].typ= 0;
 	    }
 	  }
@@ -2691,7 +2711,7 @@ correctPeriods() {
   if (per->nxt != per) {
     int tot= 0;
     Period *pp= per;
-    
+
     do {
       tot += t_per0(pp->tim, pp->nxt->tim);
       pp= pp->nxt;
@@ -2702,7 +2722,7 @@ correctPeriods() {
 	   "out of order.  Suspicious intervals are:\n");
       pp= per;
       do {
-	if (t_per0(pp->tim, pp->nxt->tim) >= H12) 
+	if (t_per0(pp->tim, pp->nxt->tim) >= H12)
 	   warn("  %02d:%02d:%02d -> %02d:%02d:%02d",
 		pp->tim % 86400000 / 3600000,
 		pp->tim % 3600000 / 60000,
@@ -2730,10 +2750,10 @@ correctPeriods() {
     printf("\n");
 
     exit(0);		// All done
-  }  
+  }
 }
 
-int 
+int
 voicesEq(Voice *v0, Voice *v1) {
   int a= N_CH;
 
@@ -2768,7 +2788,7 @@ voicesEq(Voice *v0, Voice *v1) {
 //	Read a name definition
 //
 
-void 
+void
 readNameDef() {
   char *p, *q;
   NameDef *nd;
@@ -2779,11 +2799,11 @@ readNameDef() {
   q= strchr(p, 0) - 1;
   if (*q != ':') badSeq();
   *q= 0;
-  for (q= p; *q; q++) if (!isalnum(*q) && *q != '-' && *q != '_') 
+  for (q= p; *q; q++) if (!isalnum(*q) && *q != '-' && *q != '_')
     error("Bad name \"%s\" in definition, line %d:\n  %s", p, in_lin, lin_copy);
 
   // Waveform definition ?
-  if (0 == memcmp(p, "wave", 4) && 
+  if (0 == memcmp(p, "wave", 4) &&
       isdigit(p[4]) &&
       isdigit(p[5]) &&
       !p[6]) {
@@ -2800,11 +2820,11 @@ readNameDef() {
 	error("Waveform %02d already defined, line %d:\n  %s",
 	      ii, in_lin, lin_copy);
      waves[ii]= arr;
-     
+
      while ((p= getWord())) {
 	double dd;
 	char dmy;
-	if (1 != sscanf(p, "%lf %c", &dd, &dmy)) 
+	if (1 != sscanf(p, "%lf %c", &dd, &dmy))
 	   error("Expecting floating-point numbers on this waveform "
 		 "definition line, line %d:\n  %s",
 		 in_lin, lin_copy);
@@ -2820,7 +2840,7 @@ readNameDef() {
      }
      dp1= dp;
      np= dp1 - dp0;
-     if (np < 2) 
+     if (np < 2)
 	error("Expecting at least two samples in the waveform, line %d:\n  %s",
 	      in_lin, lin_copy);
 
@@ -2829,7 +2849,7 @@ readNameDef() {
 	*dp= (*dp - dmin) / (dmax - dmin);
 
      sinc_interpolate(dp0, np, arr);
-     
+
      if (DEBUG_DUMP_WAVES) {
 	int a;
 	printf("Dumping wave%02d:\n", ii);
@@ -2837,7 +2857,7 @@ readNameDef() {
 	   printf("%d %g\n", a, arr[a] * 1.0 / ST_AMP);
      }
      return;
-  } 
+  }
 
   // Must be block or tone-set, then, so put into a NameDef
   nd= (NameDef*)Alloc(sizeof(NameDef));
@@ -2846,33 +2866,33 @@ readNameDef() {
   // Block definition ?
   if (*lin == '{') {
     BlockDef *bd, **prvp;
-    if (!(p= getWord()) || 
-	0 != strcmp(p, "{") || 
+    if (!(p= getWord()) ||
+	0 != strcmp(p, "{") ||
 	0 != (p= getWord()))
       badSeq();
 
     prvp= &nd->blk;
-    
+
     while (readLine()) {
       if (*lin == '}') {
-	if (!(p= getWord()) || 
-	    0 != strcmp(p, "}") || 
+	if (!(p= getWord()) ||
+	    0 != strcmp(p, "}") ||
 	    0 != (p= getWord()))
 	  badSeq();
 	if (!nd->blk) error("Empty blocks not permitted, line %d:\n  %s", in_lin, lin_copy);
 	nd->nxt= nlist; nlist= nd;
 	return;
       }
-      
-      if (*lin != '+') 
+
+      if (*lin != '+')
 	error("All lines in the block must have relative time, line %d:\n  %s",
 	      in_lin, lin_copy);
-      
+
       bd= (BlockDef*) Alloc(sizeof(*bd));
       *prvp= bd; prvp= &bd->nxt;
       bd->lin= StrDup(lin);
     }
-    
+
     // Hit EOF before }
     error("End-of-file within block definition (missing '}')");
   }
@@ -2910,40 +2930,40 @@ readNameDef() {
        nd->vv[ch].typ= -1-wave;
        nd->vv[ch].carr= carr;
        nd->vv[ch].res= res;
-       nd->vv[ch].amp= AMP_DA(amp);	
+       nd->vv[ch].amp= AMP_DA(amp);
        continue;
     }
     if (3 == sscanf(p, "%lf%lf/%lf %c", &carr, &res, &amp, &dmy)) {
       nd->vv[ch].typ= 1;
       nd->vv[ch].carr= carr;
       nd->vv[ch].res= res;
-      nd->vv[ch].amp= AMP_DA(amp);	
+      nd->vv[ch].amp= AMP_DA(amp);
       continue;
     }
     if (2 == sscanf(p, "%lf/%lf %c", &carr, &amp, &dmy)) {
       nd->vv[ch].typ= 1;
       nd->vv[ch].carr= carr;
       nd->vv[ch].res= 0;
-      nd->vv[ch].amp= AMP_DA(amp);	
+      nd->vv[ch].amp= AMP_DA(amp);
       continue;
     }
     if (3 == sscanf(p, "spin:%lf%lf/%lf %c", &carr, &res, &amp, &dmy)) {
       nd->vv[ch].typ= 4;
       nd->vv[ch].carr= carr;
       nd->vv[ch].res= res;
-      nd->vv[ch].amp= AMP_DA(amp);	
+      nd->vv[ch].amp= AMP_DA(amp);
       continue;
     }
     badSeq();
   }
   nd->nxt= nlist; nlist= nd;
-}  
+}
 
 //
 //	Bad time
 //
 
-void 
+void
 badTime(char *tim) {
   error("Badly constructed time \"%s\", line %d:\n  %s", tim, in_lin, lin_copy);
 }
@@ -2952,7 +2972,7 @@ badTime(char *tim) {
 //	Read a time-line of either type
 //
 
-void 
+void
 readTimeLine() {
   char *p, *tim_p;
   int nn;
@@ -2964,7 +2984,7 @@ readTimeLine() {
 
   if (!(p= getWord())) badSeq();
   tim_p= p;
-  
+
   // Read the time represented
   tim= -1;
   if (0 == memcmp(p, "NOW", 3)) {
@@ -2975,7 +2995,7 @@ readTimeLine() {
   while (*p) {
     if (*p == '+') {
       if (tim < 0) {
-	if (last_abs_time < 0) 
+	if (last_abs_time < 0)
 	  error("Relative time without previous absolute time, line %d:\n  %s", in_lin, lin_copy);
 	tim= last_abs_time;
       }
@@ -2986,17 +3006,17 @@ readTimeLine() {
     if (0 == (nn= readTime(p, &rtim))) badTime(tim_p);
     p += nn;
 
-    if (tim == -1) 
+    if (tim == -1)
       last_abs_time= tim= rtim;
-    else 
+    else
       tim= (tim + rtim) % H24;
   }
 
   if (fast_tim0 < 0) fast_tim0= tim;		// First time
   fast_tim1= tim;				// Last time
-      
+
   if (!(p= getWord())) badSeq();
-      
+
   fi= fo= 1;
   if (!isalpha(*p)) {
     switch (p[0]) {
@@ -3015,7 +3035,7 @@ readTimeLine() {
 
     if (!(p= getWord())) badSeq();
   }
-      
+
   for (nd= nlist; nd && 0 != strcmp(p, nd->name); nd= nd->nxt) ;
   if (!nd) error("Name \"%s\" not defined, line %d:\n  %s", p, in_lin, lin_copy);
 
@@ -3034,13 +3054,13 @@ readTimeLine() {
     free(prep);
     return;
   }
-      
+
   // Normal name-def
   pp= (Period*)Alloc(sizeof(*pp));
   pp->tim= tim;
   pp->fi= fi;
   pp->fo= fo;
-      
+
   memcpy(pp->v0, nd->vv, N_CH * sizeof(Voice));
   memcpy(pp->v1, nd->vv, N_CH * sizeof(Voice));
 
@@ -3114,7 +3134,7 @@ void sinc_interpolate(double *dp, int np, int *arr) {
       sinc[a]= vv;
       sinc[ST_SIZ-a]= vv;
    }
-   
+
    // Build waveform into buffer
    out= (double *)Alloc(ST_SIZ * sizeof(double));
    for (b= 0; b<np; b++) {
@@ -3147,14 +3167,14 @@ void sinc_interpolate(double *dp, int np, int *arr) {
 //	Handling pre-programmed sequences
 //
 
-void 
+void
 readPreProg(int ac, char **av) {
-   if (ac < 1) 
-      error("Expecting a pre-programmed sequence description.  Examples:" 
+   if (ac < 1)
+      error("Expecting a pre-programmed sequence description.  Examples:"
 	    NL "  drop 25ds+ pink/30"
 	    NL "  drop 25gs+/2 mix/60"
 	    );
-   
+
    // Handle 'drop'
    if (0 == strcmp(av[0], "drop")) {
       ac--; av++;
@@ -3176,7 +3196,7 @@ readPreProg(int ac, char **av) {
 //	Error for bad p-drop args
 //
 
-void 
+void
 bad_drop() {
    error("Bad arguments: expecting -p drop [<time-spec>] <drop-spec> [<tone-specs...>]"
 	 NL "<drop-spec> is <digit><digit>[.<digit>...]<a-l>[s|k][+][^][/<amp>]"
@@ -3194,7 +3214,7 @@ bad_drop() {
 //	code better.
 //
 
-void 
+void
 create_drop(int ac, char **av) {
    char *fmt;
    char *p, *q;
@@ -3203,13 +3223,13 @@ create_drop(int ac, char **av) {
    double carr, amp, c0, c2;
    double beat_target;
    double beat[40];
-   static double beat_targets[]= { 
+   static double beat_targets[]= {
       4.4, 3.7, 3.1, 2.5, 2.0, 1.5, 1.2, 0.9, 0.7, 0.5, 0.4, 0.3
    };
    char extra[256];
    int len, len0= 1800, len1= 1800, len2= 180;
    int steplen, end;
-   
+
 #define BAD bad_drop()
 
    // Pick up optional time-spec
@@ -3234,7 +3254,7 @@ create_drop(int ac, char **av) {
       p += sprintf(p, " %s", av[0]);
       ac--; av++;
    }
-   
+
    // Scan the format
    carr= 200 - 2 * strtod(fmt, &p);
    if (p == fmt || carr < 0) BAD;
@@ -3268,7 +3288,7 @@ create_drop(int ac, char **av) {
    if (*p) error("Trailing rubbish after -p drop spec: \"%s\"", p);
 
 #undef BAD
-      
+
    // Sort out carriers
    len= islong ? len0 + len1 : len0;
    c0= carr + 5.0;
@@ -3281,14 +3301,14 @@ create_drop(int ac, char **av) {
    // Display summary
    warn("DROP summary:");
    if (slide) {
-      warn(" Carrier slides from %gHz to %gHz over %d minutes", 
+      warn(" Carrier slides from %gHz to %gHz over %d minutes",
 	   c0, c2, len/60);
-      warn(" Beat frequency slides from %gHz to %gHz over %d minutes", 
+      warn(" Beat frequency slides from %gHz to %gHz over %d minutes",
 	   beat[0], beat[n_step-1], len0/60);
    } else {
-      warn(" Carrier steps from %gHz to %gHz over %d minutes", 
+      warn(" Carrier steps from %gHz to %gHz over %d minutes",
 	   c0, c2, len/60);
-      warn(" Beat frequency steps from %gHz to %gHz over %d minutes:", 
+      warn(" Beat frequency steps from %gHz to %gHz over %d minutes:",
 	   beat[0], beat[n_step-1], len0/60);
       fprintf(stderr, "   ");
       for (a= 0; a<n_step; a++) fprintf(stderr, " %.2f", beat[a]);
@@ -3304,12 +3324,12 @@ create_drop(int ac, char **av) {
 
    formatNameDef("off: -");
    formatTimeLine(86395, "== off ->");		// 23:59:55
-   
+
    if (slide) {
       // Slide version
       for (a= 0; a<n_step; a++) {
 	 int tim= a * len0 / (n_step-1);
-	 formatNameDef("ts%02d: %g+%g/%g %s", a, 
+	 formatNameDef("ts%02d: %g+%g/%g %s", a,
 		       c0 + (c2-c0) * tim * 1.0 / len,
 		       beat[a], amp, extra);
 	 formatTimeLine(tim, "== ts%02d ->", a);
@@ -3330,21 +3350,21 @@ create_drop(int ac, char **av) {
 	 int tim1= (a+1) * steplen;
 	 formatNameDef("ts%02d: %g+%g/%g %s", a,
 		       c0 + (c2-c0) * tim1/len,
-		       beat[(a>=n_step) ? n_step-1 : a], 
+		       beat[(a>=n_step) ? n_step-1 : a],
 		       amp, extra);
 	 formatTimeLine(tim0, "== ts%02d ->", a);
 	 formatTimeLine(tim1-stepslide, "== ts%02d ->", a);
       }
       end= len-stepslide;
    }
-   
+
    // Wake-up and ending
    if (wakeup) {
       formatNameDef("tswake: %g+%g/%g %s",
 		    c0, beat[0], amp, extra);
       formatTimeLine(end+len2, "== tswake ->");
       end += len2;
-   } 
+   }
    formatTimeLine(end+10, "== off");
 
    correctPeriods();
@@ -3358,7 +3378,7 @@ create_drop(int ac, char **av) {
 //
 //	-p slide [t<duration-minutes>] <carr>+<beat>/<amp> [extra tone-sets]
 
-void 
+void
 bad_slide() {
    error("Bad arguments: expecting -p slide [<time-spec>] <slide-spec> [<tone-specs...>]"
 	 NL "<slide-spec> is just like a tone-spec: <carrier><sign><beat>/<amp>"
@@ -3368,7 +3388,7 @@ bad_slide() {
 	 NL "  sequence like pink noise or a mix soundtrack, e.g 'pink/20' or 'mix/60'");
 }
 
-void 
+void
 create_slide(int ac, char **av) {
    int len= 1800;
    char *p, dmy;
@@ -3419,10 +3439,9 @@ create_slide(int ac, char **av) {
    formatNameDef("ts1: %g%+g/%g %s", c1, beat, amp, extra);
    formatTimeLine(len, "== ts1 ->");
    formatTimeLine(len+10, "== off");
-   
+
    correctPeriods();
-}   
+}
 
 
 // END //
-
