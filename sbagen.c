@@ -59,79 +59,43 @@
 
 #ifdef T_LINUX
 #define OSS_AUDIO
-#if define UNIX_TIME
-#else
-  #error UNIX_TIME or WIN_TIME not defined.  Maybe you did not define one of T_LINUX/T_MINGW/T_MACOSX/etc ?
-#endif
-#if define UNIX_MISC
-#else
-  #error UNIX_MISC or WIN_MISC not defined.  Maybe you did not define one of T_LINUX/T_MINGW/T_MACOSX/etc ?
-#endif
+#define UNIX_TIME
+#define UNIX_MISC
 #define ANSI_TTY
 #endif
 
 #ifdef T_LINUX_ALSA
 #define ALSA_AUDIO
-#if define UNIX_TIME
-#else
-  #error UNIX_TIME or WIN_TIME not defined.  Maybe you did not define one of T_LINUX/T_MINGW/T_MACOSX/etc ?
-#endif
-#if define UNIX_MISC
-#else
-  #error UNIX_MISC or WIN_MISC not defined.  Maybe you did not define one of T_LINUX/T_MINGW/T_MACOSX/etc ?
-#endif
+#define UNIX_TIME
+#define UNIX_MISC
 #define ANSI_TTY
 #endif
 
 #ifdef T_MINGW
 #define WIN_AUDIO
-#if define WIN_TIME
-#else
-  #error UNIX_TIME or WIN_TIME not defined.  Maybe you did not define one of T_LINUX/T_MINGW/T_MACOSX/etc ?
-#endif
-#if define WIN_MISC
-#else
-  #error UNIX_MISC or WIN_MISC not defined.  Maybe you did not define one of T_LINUX/T_MINGW/T_MACOSX/etc ?
-#endif
+#define WIN_TIME
+#define WIN_MISC
 #define EXIT_KEY
 #endif
 
 #ifdef T_MSVC
 #define WIN_AUDIO
-#if define WIN_TIME
-#else
-  #error UNIX_TIME or WIN_TIME not defined.  Maybe you did not define one of T_LINUX/T_MINGW/T_MACOSX/etc ?
-#endif
-#if define WIN_MISC
-#else
-  #error UNIX_MISC or WIN_MISC not defined.  Maybe you did not define one of T_LINUX/T_MINGW/T_MACOSX/etc ?
-#endif
+#define WIN_TIME
+#define WIN_MISC
 #define EXIT_KEY
 #endif
 
 #ifdef T_MACOSX
 #define MAC_AUDIO
-#if define UNIX_TIME
-#else
-  #error UNIX_TIME or WIN_TIME not defined.  Maybe you did not define one of T_LINUX/T_MINGW/T_MACOSX/etc ?
-#endif
-#if define UNIX_MISC
-#else
-  #error UNIX_MISC or WIN_MISC not defined.  Maybe you did not define one of T_LINUX/T_MINGW/T_MACOSX/etc ?
-#endif
+#define UNIX_TIME
+#define UNIX_MISC
 #define ANSI_TTY
 #endif
 
 #ifdef T_POSIX
 #define NO_AUDIO
-#if define UNIX_TIME
-#else
-  #error UNIX_TIME or WIN_TIME not defined.  Maybe you did not define one of T_LINUX/T_MINGW/T_MACOSX/etc ?
-#endif
-#if define UNIX_MISC
-#else
-  #error UNIX_MISC or WIN_MISC not defined.  Maybe you did not define one of T_LINUX/T_MINGW/T_MACOSX/etc ?
-#endif
+#define UNIX_TIME
+#define UNIX_MISC
 #endif
 
 // Make sure NO_AUDIO is set if necessary
@@ -241,7 +205,19 @@
 #define UNIX_TIMESTAMP (_UNIX_TIMESTAMP(__TIME_YEARS__, __TIME_MONTH__, __TIME_DAYS__, __TIME_HOURS__, __TIME_MINUTES__, __TIME_SECONDS__))
 
 #endif
+// Make sure one of the _TIME macros is set
+#ifndef UNIX_TIME
+#ifndef WIN_TIME
+#error UNIX_TIME or WIN_TIME not defined.  Maybe you did not define one of T_LINUX/T_MINGW/T_MACOSX/etc ?
+#endif
+#endif
 
+// Make sure one of the _MISC macros is set
+#ifndef UNIX_MISC
+#ifndef WIN_MISC
+#error UNIX_MISC or WIN_MISC not defined.  Maybe you did not define one of T_LINUX/T_MINGW/T_MACOSX/etc ?
+#endif
+#endif
 #include <stdio.h>
 #include <math.h>
 #include <stdarg.h>
