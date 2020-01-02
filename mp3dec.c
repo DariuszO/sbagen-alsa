@@ -95,7 +95,7 @@ mp3_read(int *dst, int dlen) {
 	 rp += cnt;
 
 	 mad_stream_buffer(&stream, (const unsigned char*)mp3_buf, rp - mp3_buf);
-	 stream.error= 0;
+	 stream.error=(mad_error) 0;
       }
 
       // Decode frame
