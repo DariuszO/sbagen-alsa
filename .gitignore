@@ -1,0 +1,6 @@
+*~
+*.swp
+/libmad/
+/libs/
+/tremor/
+sbagen

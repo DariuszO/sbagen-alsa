@@ -112,7 +112,7 @@ ogg_read(int *dst, int dlen) {
       }
 
       // Refill buffer
-      rv= ov_read(&oggfile, (char*)ogg_buf0, (ogg_buf1-ogg_buf0)*sizeof(short), 0,2,1, &sect);
+      rv= ov_read(&oggfile, (char*)ogg_buf0, (ogg_buf1-ogg_buf0)*sizeof(short),0,2,1, &sect);
       //debug("ov_read %d/%d", rv, (ogg_buf1-ogg_buf0)*sizeof(short));
       if (rv < 0) {
 	 warn("Recoverable error in Ogg stream  ");
@@ -506,7 +506,7 @@ looper_read(int *dst, int dlen) {
 	       int sect;
 	       char *buf= (char*)aa->buf0;	
 	       int len= (aa->buf1-aa->buf0)*sizeof(aa->buf0[0]);
-	       int rv= ov_read(&aa->ogg, buf, len, 0,2,1, &sect);
+	       int rv= ov_read(&aa->ogg, buf, len,0,2,1, &sect);
 	       if (rv < 0) {
 		  warn("Recoverable error in Ogg stream  ");
 		  continue;
