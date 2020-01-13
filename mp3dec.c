@@ -1,3 +1,10 @@
+#ifdef _cplusplus
+
+extern “C”
+
+{
+
+#endif
 //
 //	MP3 decoding using libMAD
 //
@@ -20,6 +27,7 @@ static struct mad_synth synth;
 static char *mp3_buf;
 static int mp3_len;
 static int synth_extra;		// Extra samples carried over from previous frame
+static int mad_error;
 
 void 
 mp3_init() {
@@ -34,6 +42,7 @@ mp3_init() {
 
    // Force first data read
    stream.error= MAD_ERROR_BUFLEN;
+   mad_error = 0;
    synth_extra= 0;
 
    inbuf_start(mp3_read, 256*1024);	// 1024K buffer: 3s@44.1kHz
@@ -58,7 +67,7 @@ mp3_read(int *dst, int dlen) {
    int *dst0= dst;
    int cnt, a, val;
 
-   //debug("mp3_read %d", dlen);
+   debug("mp3_read %d", dlen);
 
    while (dlen > 0) {
       // First use up any samples from previous synth frame
@@ -95,7 +104,7 @@ mp3_read(int *dst, int dlen) {
 	 rp += cnt;
 
 	 mad_stream_buffer(&stream, (const unsigned char*)mp3_buf, rp - mp3_buf);
-	 stream.error=(mad_error) 0;
+	 stream.error=(mad_error);
       }
 
       // Decode frame
@@ -124,3 +133,8 @@ mp3_read(int *dst, int dlen) {
 }
 
 // END //
+#ifdef _cplusplus
+
+}
+
+#endif
