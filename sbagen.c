@@ -35,9 +35,9 @@ extern “C”
 //	FINK project's patches to ESounD, by Shawn Hsiao and Masanori
 //	Sekino.  See: http://fink.sf.net
 
-#define VERSION "1.4.6"
-#define SUBVERSION "-dev"
-#define TYPEVERSION "-beta"
+#define VERSION "1.4.5.1"
+#define SUBVERSION "-mod"
+#define TYPEVERSION "-dev"
 
 // This should be built with one of the following target macros
 // defined, which selects options for that platform, or else with some
@@ -52,7 +52,6 @@ extern “C”
 // Ogg and MP3 support is handled separately from the T_* macros.
 
 // Define OSS_AUDIO to use /dev/dsp for audio output
-// Define OSS_ALSA for alsa support
 // Define WIN_AUDIO to use Win32 calls
 // Define MAC_AUDIO to use Mac CoreAudio calls
 // Define NO_AUDIO if no audio output device is usable
@@ -68,13 +67,6 @@ extern “C”
 
 #ifdef T_LINUX
 #define OSS_AUDIO
-#define UNIX_TIME
-#define UNIX_MISC
-#define ANSI_TTY
-#endif
-
-#ifdef T_LINUX_ALSA
-#define ALSA_AUDIO
 #define UNIX_TIME
 #define UNIX_MISC
 #define ANSI_TTY
@@ -109,11 +101,9 @@ extern “C”
 
 // Make sure NO_AUDIO is set if necessary
 #ifndef OSS_AUDIO
-#ifndef ALSA_AUDIO
 #ifndef MAC_AUDIO
 #ifndef WIN_AUDIO
 #define NO_AUDIO
-#endif
 #endif
 #endif
 #endif
@@ -150,17 +140,13 @@ extern “C”
  #define vsnprintf _vsnprintf
  typedef long long S64;		// I have no idea if this is correct for MSVC
 #else
- #include <unistd.h>
- #include <sys/time.h>
- typedef long long S64;
+#include <unistd.h>
+#include <sys/time.h>
+typedef long long S64;
 #endif
 
 #ifdef T_MINGW
  #define vsnprintf _vsnprintf
-#endif
-
-#ifdef ALSA_AUDIO
- #include <alsa/asoundlib.h>
 #endif
 
 #ifdef OSS_AUDIO
@@ -204,7 +190,7 @@ void debug(char *fmt, ...) ;
 void warn(char *fmt, ...) ;
 void * Alloc(size_t len) ;
 char * StrDup(char *str) ;
-int calcNow() ;
+inline int calcNow() ;
 void loop() ;
 void outChunk() ;
 void corrVal(int ) ;
@@ -264,9 +250,9 @@ help() {
 	  NL "  reserved, released under the GNU GPL v2.  See file COPYING."
 	  NL "Modified by Deadjim | Copyright (c) 2019-2020."
 	  NL
-	  NL "Usage: sbagen [options] seq-file ..."
-	  NL "       sbagen [options] -i tone-specs ..."
-	  NL "       sbagen [options] -p pre-programmed-sequence-specs ..."
+	  NL "Usage: sbbg [options] seq-file ..."
+	  NL "       sbbg [options] -i tone-specs ..."
+	  NL "       sbbg [options] -p pre-programmed-sequence-specs ..."
 	  NL
 	  NL "Options:  -h        Display this help-text"
 	  NL "          -Q        Quiet - don't display running status"
@@ -278,7 +264,7 @@ help() {
 	  NL "          -q mult   Quick.  Run through quickly (real time x 'mult') from the"
 	  NL "                     start time, rather than wait for real time to pass"
 	  NL
-	  NL "          -r rate   Select the output rate (default is 48000 Hz, or from -m)"
+	  NL "          -r rate   Select the output rate (default is 96000 Hz, or from -m)"
 #ifndef MAC_AUDIO
 	  NL "          -b bits   Select the number bits for output (8 or 16, default 16)"
 #endif
@@ -306,7 +292,7 @@ help() {
 	  NL "                      with the generated binaural beats (raw only)"
 	  NL
 	  NL "          -R rate   Select rate in Hz that frequency changes are recalculated"
-	  NL "                     (for file/pipe output only, default is 10Hz)"
+	  NL "                     (for file/pipe output only, default is 40Hz)"
 	  NL "          -F fms    Fade in/out time in ms (default 30000ms)"
 #ifdef OSS_AUDIO
 	  NL "          -d dev    Select a different output device instead of /dev/dsp"
@@ -324,11 +310,11 @@ usage() {
 	NL "  reserved, released under the GNU GPL v2.  See file COPYING."
 	NL "Modified by Deadjim | Copyright (c) 2019-2020."
 	NL 
-	NL "Usage: sbagen [options] seq-file ..."
-	NL "       sbagen [options] -i tone-specs ..."
-	NL "       sbagen [options] -p pre-programmed-sequence-specs ..."
+	NL "Usage: sbbg [options] seq-file ..."
+	NL "       sbbg [options] -i tone-specs ..."
+	NL "       sbbg [options] -p pre-programmed-sequence-specs ..."
 	NL
-	NL "For full usage help, type 'sbagen -h'.  For latest version see"
+	NL "For full usage help, type 'sbbg -h'.  For latest version see"
 	NL "http://uazu.net/sbagen/ or http://sbagen.sf.net/"
 #ifdef EXIT_KEY
 	NL
@@ -395,7 +381,7 @@ struct BlockDef {
 #define NS_ADJ 12		// Noise is generated internally with amplitude ST_AMP<<NS_ADJ
 #define NS_DITHER 16		// How many bits right to shift the noise for dithering
 #define NS_AMP (ST_AMP<<NS_ADJ)
-#define ST_SIZ 16384		// Number of elements in sine-table (power of 2);
+#define ST_SIZ 32768		// Number of elements in sine-table (power of 2);
 int *sin_table;
 #define AMP_DA(pc) (40.96 * (pc))	// Display value (%age) to ->amp value
 #define AMP_AD(amp) ((amp) / 40.96)	// Amplitude value to display %age
@@ -414,15 +400,15 @@ int out_bps;			// Output bytes per sample (2 or 4)
 int out_buf_ms;			// Time to output a buffer-ful in ms
 int out_buf_lo;			// Time to output a buffer-ful, fine-tuning in ms/0x10000
 int out_fd;			// Output file descriptor
-int out_rate= 48000;		// Sample rate
+int out_rate= 96000;		// Sample rate
 int out_rate_def= 1;		// Sample rate is default value, not set by user
 int out_mode= 1;		// Output mode: 0 unsigned char[2], 1 short[2], 2 swapped short[2]
-int out_prate= 10;		// Rate of parameter change (for file and pipe output only)
+int out_prate= 20;		// Rate of parameter change (for file and pipe output only)
 int fade_int= 30000;		// Fade interval (ms)
 FILE *in;			// Input sequence file
 int in_lin;			// Current input line
-char buf[4096];			// Buffer for current line
-char buf_copy[4096];		// Used to keep unmodified copy of line
+char buf[8192];			// Buffer for current line
+char buf_copy[8192];		// Used to keep unmodified copy of line
 char *lin;			// Input line (uses buf[])
 char *lin_copy;			// Copy of input line
 double spin_carr_max;		// Maximum 'carrier' value for spin (really max width in us)
@@ -449,11 +435,7 @@ int opt_L= -1;			// Length in ms, or -1
 int opt_T= -1;			// Start time in ms, or -1
 char *opt_o;			// File name to output to, or 0
 char *opt_m;			// File name to read mix data from, or 0
-#ifdef ALSA_AUDIO
-char *opt_d= "default";    // Output device
-#else
 char *opt_d= "/dev/dsp";	// Output device
-#endif
 
 FILE *mix_in;			// Input stream for mix sound data, or 0
 int mix_cnt;			// Version number from mix filename (#<digits>), or -1
@@ -469,7 +451,7 @@ char *pdir;			// Program directory (used as second place to look for -m files)
 
 #ifdef WIN_AUDIO
  #define BUFFER_COUNT 8
- #define BUFFER_SIZE 8192*4
+ #define BUFFER_SIZE 8192*8
  HWAVEOUT aud_handle;
  WAVEHDR *aud_head[BUFFER_COUNT];
  int aud_current;		// Current header
@@ -483,10 +465,6 @@ char *pdir;			// Program directory (used as second place to look for -m files)
  int aud_rd;	// Next buffer to read out of list (to send to device)
  int aud_wr;	// Next buffer to write.  aud_rd==aud_wr means empty buffer list
  static AudioDeviceID aud_dev;
-#endif
-
-#ifdef ALSA_AUDIO
-snd_pcm_t *playback_handle;
 #endif
 
 //
@@ -513,9 +491,6 @@ delay(int ms) {
 //
 //	WAV/OGG/MP3 input data buffering
 //
-
-void
-delay(int ms);
 
 int *inbuf;		// Buffer for input data (as 20-bit samples)
 int ib_len;		// Length of input buffer (in ints)
@@ -1193,7 +1168,6 @@ error(char *fmt, ...) {
   getchar();
 #endif
   exit(1);
-  va_end(ap);
 }
 
 void 
@@ -1201,7 +1175,6 @@ debug(char *fmt, ...) {
   va_list ap; va_start(ap, fmt);
   vfprintf(stderr, fmt, ap);
   fprintf(stderr, "\n");
-  va_end(ap);
 }
 
 void 
@@ -1209,7 +1182,6 @@ warn(char *fmt, ...) {
   va_list ap; va_start(ap, fmt);
   vfprintf(stderr, fmt, ap);
   fprintf(stderr, "\n");
-  va_end(ap);
 }
 
 void *
@@ -1266,11 +1238,11 @@ calcNow() {
 #endif
 
 #if DEBUG_CHK_UTIME
-inline int buf;
+int buf;
 inline int 
 userTime() {
-  struct tms buf;
-  times(&buf);
+  struct tms (&buf);
+  int times(&buf);
   return buf.tms_utime;
 }
 #else
@@ -1532,12 +1504,12 @@ outChunk() {
 
 
       // Add pink noise as dithering
-      tot1 += (ns >> NS_DITHER) + 0x8000;
-      tot2 += (ns >> NS_DITHER) + 0x8000;
+      // tot1 += (ns >> NS_DITHER) + 0x8000;
+      // tot2 += (ns >> NS_DITHER) + 0x8000;
       
       // Add white noise as dithering
-      tot1 += (seed >> 1) + 0x8000;
-      tot2 += (seed >> 1) + 0x8000;
+      // tot1 += (seed >> 1) + 0x8000;
+      // tot2 += (seed >> 1) + 0x8000;
 
       // White noise dither; you could also try (rand0-rand1) for a
       // dither with more high frequencies
@@ -1617,7 +1589,7 @@ writeOut(char *buf, int siz) {
      memcpy(aud_head[aud_current]->lpData, buf, siz);
      aud_head[aud_current]->dwBufferLength= (DWORD)siz;
 
-     debug("Output buffer %d", aud_current);
+     //debug("Output buffer %d", aud_current);
      rv= waveOutWrite(aud_handle, aud_head[aud_current], sizeof(WAVEHDR));
 
      if (rv != MMSYSERR_NOERROR) {
@@ -1644,24 +1616,6 @@ writeOut(char *buf, int siz) {
     memcpy(aud_buf[aud_wr], buf, siz);
     aud_wr= new_wr;
 
-    return;
-  }
-#endif
-
-#ifdef ALSA_AUDIO
-  long frames_written, frames_to_write=siz/4; //i think 4  because stereo, 2 bytes per sample*/
-  if (out_fd == -9999) {
-    printf("siz:%d\n",siz);
-    while(frames_to_write>0){
-      frames_written = snd_pcm_writei(playback_handle, buf, frames_to_write);
-      if (frames_written < 0) {
-        printf("snd_pcm_writei failed: %s\n", snd_strerror(frames_written));
-        exit(1);
-      }
-      printf("%d\n",frames_written);
-      buf += frames_written * 4;
-      frames_to_write -= frames_written;
-    }
     return;
   }
 #endif
@@ -1803,9 +1757,9 @@ corrVal(int running) {
 	    tot_other += vv->amp;
 	 }
       }
-      if (tot_beat + tot_other > 4096) {
-	 double adj_beat= (tot_beat > 4096) ? 4096 / tot_beat : 1.0;
-	 double adj_other= (4096 - tot_beat * adj_beat) / tot_other;
+      if (tot_beat + tot_other > 8192) {
+	 double adj_beat= (tot_beat > 8192) ? 8192 / tot_beat : 1.0;
+	 double adj_other= (8192 - tot_beat * adj_beat) / tot_other;
 	 for (a= 0; a<N_CH; a++) {
 	    vv= &chan[a].v;
 	    if (vv->typ == 1)
@@ -1884,12 +1838,12 @@ setup_device(void) {
 	error("Can't open \"%s\", errno %d", opt_o, errno);
       out_fd= fileno(out);
     }
-    out_blen= out_rate * 2 / out_prate;		// 10 fragments a second by default
+    out_blen= out_rate * 4 / out_prate;		// 20 fragments a second by default
     while (out_blen & (out_blen-1)) out_blen &= out_blen-1;		// Make power of two
     out_bsiz= out_blen * (out_mode ? 2 : 1);
     out_bps= out_mode ? 4 : 2;
     out_buf= (short*)Alloc(out_blen * sizeof(short));
-    out_buf_lo= (int)(0x10000 * 1000.0 * 0.5 * out_blen / out_rate);
+    out_buf_lo= (int)(0x10000 * 1000.0 * 0.25 * out_blen / out_rate);
     out_buf_ms= out_buf_lo >> 16;
     out_buf_lo &= 0xFFFF;
     tmp_buf= (int*)Alloc(out_blen * sizeof(int));
@@ -1904,13 +1858,13 @@ setup_device(void) {
   // Normal /dev/dsp output
   {
     int stereo, rate, fragsize, numfrags, enc;
-    int targ_ms= 400;	// How much buffering we want, ideally
+    int targ_ms= 125;	// How much buffering we want, ideally
     int afmt_req, afmt;
     int test= 1;
     audio_buf_info info;
     int retry= 0;
 
-    fragsize= 14;  // Ask for fragments of 2^14 == 16384 bytes == 4096 samples
+    fragsize= 28;  // Ask for fragments of 2^14 == 16384 bytes == 4096 samples
 
     while (1) {
        if (0 > (out_fd= open(opt_d, O_WRONLY)))
@@ -1947,7 +1901,7 @@ setup_device(void) {
 	  close(out_fd);
 	  for (fragsize= 1; (1<<fragsize) < info.fragsize; fragsize++) ;
 	  retry= 1;
-	  warn("Retrying /dev/dsp open for fragsize %d", fragsize);
+	  //warn("Retrying /dev/dsp open for fragsize %d", fragsize);
 	  continue;
        }
        break;
@@ -1957,7 +1911,7 @@ setup_device(void) {
     out_blen= out_mode ? out_bsiz/2 : out_bsiz;
     out_bps= out_mode ? 4 : 2;
     out_buf= (short*)Alloc(out_blen * sizeof(short));
-    out_buf_lo= (int)(0x10000 * 1000.0 * 0.5 * out_blen / out_rate);
+    out_buf_lo= (int)(0x10000 * 1000.0 * 0.25 * out_blen / out_rate);
     out_buf_ms= out_buf_lo >> 16;
     out_buf_lo &= 0xFFFF;
     tmp_buf= (int*)Alloc(out_blen * sizeof(int));
@@ -2034,7 +1988,7 @@ setup_device(void) {
      out_blen= out_mode ? out_bsiz/2 : out_bsiz;
      out_bps= out_mode ? 4 : 2;
      out_buf= (short*)Alloc(out_blen * sizeof(short));
-     out_buf_lo= (int)(0x10000 * 1000.0 * 0.5 * out_blen / out_rate);
+     out_buf_lo= (int)(0x10000 * 1000.0 * 0.25 * out_blen / out_rate);
      out_buf_ms= out_buf_lo >> 16;
      out_buf_lo &= 0xFFFF;
      out_fd= -9999;
@@ -2128,58 +2082,6 @@ setup_device(void) {
     }
   }
 #endif
-
-#ifdef ALSA_AUDIO
-
-  /**boilerplate alsa device init code*/
-
-  int err;
-  
-  if ((err = snd_pcm_open (&playback_handle, opt_d, SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
-
-    fprintf (stderr, "cannot open audio device %s (%s)\n",
-
-             opt_d,
-
-             snd_strerror (err));
-
-    exit (1);
-
-  }
-
-  if ((err = snd_pcm_set_params(playback_handle,
-                                out_mode ? SND_PCM_FORMAT_S16 : SND_PCM_FORMAT_S8,
-                                SND_PCM_ACCESS_RW_INTERLEAVED,
-                                2,
-                                out_rate,
-                                1,
-                                500000)) < 0) {   /* 0.5sec */
-
-    printf("Playback open error: %s\n", snd_strerror(err));
-    exit(EXIT_FAILURE);
-  }
-
-    snd_pcm_hw_params_t* hw_params;
-    snd_pcm_uframes_t p_size;
-    snd_pcm_hw_params_alloca(&hw_params);
-    snd_pcm_hw_params_current(playback_handle, hw_params);
-    snd_pcm_hw_params_get_buffer_size(hw_params, &p_size);
-
-    //sbagen audio init
-
-    out_bsiz= 1024*8;//p_size*2;
-    out_blen= out_mode ? out_bsiz/2 : out_bsiz;
-    out_bps= out_mode ? 4 : 2;
-    out_buf= (short*)Alloc(out_blen * sizeof(short));
-    out_buf_lo= (int)(0x10000 * 1000.0 * 0.5 * out_blen / out_rate);
-    out_buf_ms= out_buf_lo >> 16;
-    out_buf_lo &= 0xFFFF;
-    tmp_buf= (int*)Alloc(out_blen * sizeof(int));
-
-    out_fd= -9999;
-
-#endif
-
 #ifdef NO_AUDIO
   error("Direct output to soundcard not supported on this platform.\n"
 	"Use -o or -O to write raw data, or -Wo or -WO to write a WAV file.");
@@ -2201,7 +2103,7 @@ win32_audio_callback(HWAVEOUT hand, UINT uMsg,
        break;
     case WOM_DONE:
        aud_cnt--;
-       debug("Buffer done (cnt==%d)", aud_cnt);
+       //debug("Buffer done (cnt==%d)", aud_cnt);
        //debug_win32_buffer_status();
        break;
    }
@@ -2380,7 +2282,6 @@ formatTimeLine(int tim, char *fmt, ...) {
    va_start(ap, fmt);
    vsnprintf(p, buf + sizeof(buf) - p, fmt, ap);
    readTimeLine2();
-   va_end(ap);
 }
 
 //
@@ -3136,7 +3037,7 @@ create_drop(int ac, char **av) {
    double beat_target;
    double beat[40];
    static double beat_targets[]= { 
-      9.6, 6, 5.8, 3.5, 2.67, 2.5, 2.3, 2.2, 1.5, 1.2, 1.1, 1, 0.9, 0.5
+      4.4, 3.7, 3.1, 2.5, 2.0, 1.5, 1.2, 0.9, 0.7, 0.5, 0.4, 0.3
    };
    char extra[256];
    int len, len0= 1800, len1= 1800, len2= 180;
@@ -3168,7 +3069,7 @@ create_drop(int ac, char **av) {
    }
    
    // Scan the format
-   carr= 210.42 - 2.5 * strtod(fmt, &p);
+   carr= 200 - 2 * strtod(fmt, &p);
    if (p == fmt || carr < 0) BAD;
 
    a= tolower(*p) - 'a'; p++;
@@ -3176,7 +3077,7 @@ create_drop(int ac, char **av) {
    beat_target= beat_targets[a];
 
    slide= 0;
-   steplen= 300;
+   steplen= 180;
    if (*p == 's') { p++; slide= 1; steplen= 60; }
    else if (*p == 'k') { p++; steplen= 60; }
    n_step= 1 + (len0-1) / steplen;	// Round up
@@ -3302,7 +3203,7 @@ bad_slide() {
 
 void 
 create_slide(int ac, char **av) {
-   int len= 3000;
+   int len= 1800;
    char *p, dmy;
    double val, c0, c1, beat, amp;
    char extra[256];

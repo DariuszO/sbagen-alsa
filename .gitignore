@@ -1,6 +1,8 @@
 *~
 *.swp
 /libmad/
-/libs/
 /tremor/
+/oldlib/
 sbagen
+Makefile
+configure
