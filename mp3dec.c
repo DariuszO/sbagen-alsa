@@ -13,7 +13,7 @@ extern “C”
 //      http://uazu.net/sbagen/.  Released under the GNU GPL version 2.
 //
 
-#include "libs/mad.h"
+#include "oldlib/mad.h"
 
 extern FILE *mix_in;
 extern void *Alloc(size_t);

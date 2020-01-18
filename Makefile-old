@@ -2,7 +2,9 @@
 all:
 	git submodule update
 	sh build-libs.sh
-	gcc -std=gnu18 -DT_LINUX_ALSA -Wall -g -O2 -o sbagen -ggdb -fno-omit-frame-pointer sbagen.c -lm -lpthread `pkg-config --cflags alsa` -DOGG_DECODE `pkg-config --libs alsa` `pkg-config --libs vorbisfile`
+	#gcc -std=gnu18 -DT_LINUX_ALSA -Wall -g -O2 -o sbagen -ggdb -fno-omit-frame-pointer sbagen.c -lm -lpthread `pkg-config --cflags alsa` -DOGG_DECODE `pkg-config --libs alsa` `pkg-config --libs vorbisfile`
+	gcc-6.5 -std=gnu89 -DT_LINUX_ALSA -DMP3_DECODE -DOGG_DECODE -Wall -g -O2 -ggdb -fno-omit-frame-pointer sbagen.c -o sbagen -lm -lpthread -logg -lmad `pkg-config --cflags alsa` `pkg-config --libs alsa` `pkg-config --libs vorbisfile` `pkg-config --libs ogg` `pkg-config --libs mad` `pkg-config --cflags vorbisfile` `pkg-config --cflags ogg` `pkg-config --cflags mad`
+
 
 # clean house
 clean:
